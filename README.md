@@ -58,17 +58,17 @@ A continuación se muestra el diseño visual de las cartas del juego de Cariocas
 
 <p>
   <img src="./public/images/7_sword.png" width="60" />
-  <img src="./public/images/K_cup.png" width="60" />
-  <img src="./public/images/4_coin.png" width="60" />
-  <img src="./public/images/J_club.png" width="60" />
+  <img src="./public/images/K_cups.png" width="60" />
+  <img src="./public/images/4_coins.png" width="60" />
+  <img src="./public/images/J_clubs.png" width="60" />
   <img src="./public/images/A_sword.png" width="60" />
-  <img src="./public/images/9_cup.png" width="60" />
-  <img src="./public/images/2_coin.png" width="60" />
-  <img src="./public/images/Q_club.png" width="60" />
+  <img src="./public/images/9_cups.png" width="60" />
+  <img src="./public/images/2_coins.png" width="60" />
+  <img src="./public/images/Q_clubs.png" width="60" />
   <img src="./public/images/5_sword.png" width="60" />
-  <img src="./public/images/10_cup.png" width="60" />
-  <img src="./public/images/3_coin.png" width="60" />
-  <img src="./public/images/8_club.png" width="60" />
+  <img src="./public/images/10_cups.png" width="60" />
+  <img src="./public/images/3_coins.png" width="60" />
+  <img src="./public/images/8_clubs.png" width="60" />
 </p>
 
 ---
