@@ -38,7 +38,7 @@ A continuación se muestra el diseño visual de las cartas del juego de Cariocas
 
 ### Mazo Completo de Cartas (52 Cartas)
 
-**Espadas:**
+**Espadas (Swords):**
 <p>
   <img src="./public/images/A_sword.png" width="50" />
   <img src="./public/images/2_sword.png" width="50" />
@@ -55,55 +55,55 @@ A continuación se muestra el diseño visual de las cartas del juego de Cariocas
   <img src="./public/images/K_sword.png" width="50" />
 </p>
 
-**Copas:**
+**Copas (Cups):**
 <p>
-  <img src="./public/images/A_cup.png" width="50" />
-  <img src="./public/images/2_cup.png" width="50" />
-  <img src="./public/images/3_cup.png" width="50" />
-  <img src="./public/images/4_cup.png" width="50" />
-  <img src="./public/images/5_cup.png" width="50" />
-  <img src="./public/images/6_cup.png" width="50" />
-  <img src="./public/images/7_cup.png" width="50" />
-  <img src="./public/images/8_cup.png" width="50" />
-  <img src="./public/images/9_cup.png" width="50" />
-  <img src="./public/images/10_cup.png" width="50" />
-  <img src="./public/images/J_cup.png" width="50" />
-  <img src="./public/images/Q_cup.png" width="50" />
-  <img src="./public/images/K_cup.png" width="50" />
+  <img src="./public/images/A_cups.png" width="50" />
+  <img src="./public/images/2_cups.png" width="50" />
+  <img src="./public/images/3_cups.png" width="50" />
+  <img src="./public/images/4_cups.png" width="50" />
+  <img src="./public/images/5_cups.png" width="50" />
+  <img src="./public/images/6_cups.png" width="50" />
+  <img src="./public/images/7_cups.png" width="50" />
+  <img src="./public/images/8_cups.png" width="50" />
+  <img src="./public/images/9_cups.png" width="50" />
+  <img src="./public/images/10_cups.png" width="50" />
+  <img src="./public/images/J_cups.png" width="50" />
+  <img src="./public/images/Q_cups.png" width="50" />
+  <img src="./public/images/K_cups.png" width="50" />
 </p>
 
-**Oros:**
+**Monedas (Coins):**
 <p>
-  <img src="./public/images/A_coin.png" width="50" />
-  <img src="./public/images/2_coin.png" width="50" />
-  <img src="./public/images/3_coin.png" width="50" />
-  <img src="./public/images/4_coin.png" width="50" />
-  <img src="./public/images/5_coin.png" width="50" />
-  <img src="./public/images/6_coin.png" width="50" />
-  <img src="./public/images/7_coin.png" width="50" />
-  <img src="./public/images/8_coin.png" width="50" />
-  <img src="./public/images/9_coin.png" width="50" />
-  <img src="./public/images/10_coin.png" width="50" />
-  <img src="./public/images/J_coin.png" width="50" />
-  <img src="./public/images/Q_coin.png" width="50" />
-  <img src="./public/images/K_coin.png" width="50" />
+  <img src="./public/images/A_coins.png" width="50" />
+  <img src="./public/images/2_coins.png" width="50" />
+  <img src="./public/images/3_coins.png" width="50" />
+  <img src="./public/images/4_coins.png" width="50" />
+  <img src="./public/images/5_coins.png" width="50" />
+  <img src="./public/images/6_coins.png" width="50" />
+  <img src="./public/images/7_coins.png" width="50" />
+  <img src="./public/images/8_coins.png" width="50" />
+  <img src="./public/images/9_coins.png" width="50" />
+  <img src="./public/images/10_coins.png" width="50" />
+  <img src="./public/images/J_coins.png" width="50" />
+  <img src="./public/images/Q_coins.png" width="50" />
+  <img src="./public/images/K_coins.png" width="50" />
 </p>
 
-**Tréboles:**
+**Tréboles (Clubs):**
 <p>
-  <img src="./public/images/A_club.png" width="50" />
-  <img src="./public/images/2_club.png" width="50" />
-  <img src="./public/images/3_club.png" width="50" />
-  <img src="./public/images/4_club.png" width="50" />
-  <img src="./public/images/5_club.png" width="50" />
-  <img src="./public/images/6_club.png" width="50" />
-  <img src="./public/images/7_club.png" width="50" />
-  <img src="./public/images/8_club.png" width="50" />
-  <img src="./public/images/9_club.png" width="50" />
-  <img src="./public/images/10_club.png" width="50" />
-  <img src="./public/images/J_club.png" width="50" />
-  <img src="./public/images/Q_club.png" width="50" />
-  <img src="./public/images/K_club.png" width="50" />
+  <img src="./public/images/A_clubs.png" width="50" />
+  <img src="./public/images/2_clubs.png" width="50" />
+  <img src="./public/images/3_clubs.png" width="50" />
+  <img src="./public/images/4_clubs.png" width="50" />
+  <img src="./public/images/5_clubs.png" width="50" />
+  <img src="./public/images/6_clubs.png" width="50" />
+  <img src="./public/images/7_clubs.png" width="50" />
+  <img src="./public/images/8_clubs.png" width="50" />
+  <img src="./public/images/9_clubs.png" width="50" />
+  <img src="./public/images/10_clubs.png" width="50" />
+  <img src="./public/images/J_clubs.png" width="50" />
+  <img src="./public/images/Q_clubs.png" width="50" />
+  <img src="./public/images/K_clubs.png" width="50" />
 </p>
 
 ### Muestra de la Mano del Jugador
