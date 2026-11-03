@@ -36,7 +36,7 @@ El sistema está dividido operacionalmente según las responsabilidad de cada ca
 
 A continuación se muestra el diseño visual de las cartas del juego de Cariocas integradas en la interfaz:
 
-### Mazo Completo de Cartas (52 Cartas)
+### Mazo Completo de Cartas (52 Cartas + 2 JOKER)
 
 **Espadas (Swords):**
 <p>
@@ -122,6 +122,14 @@ A continuación se muestra el diseño visual de las cartas del juego de Cariocas
   <img src="./public/images/3_coins.png" width="60" />
   <img src="./public/images/8_clubs.png" width="60" />
 </p>
+
+**JOKERS:**
+<p>
+  <img src="./public/images/JOKER.png" width="60" />
+  <img src="./public/images/JOKER1.png" width="60" />
+</p>
+
+
 
 ---
 
