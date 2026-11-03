@@ -36,74 +36,40 @@ El sistema está dividido operacionalmente según las responsabilidad de cada ca
 
 A continuación se muestra el diseño visual de las cartas del juego de Cariocas integradas en la interfaz:
 
-| Mazo de Cartas de la Baraja | Muestra de la Mano del Jugador |
-| :---: | :---: |
-| ![Baraja de Cartas](./public/images/A_sword.png
-./public/images/2_sword.png
-./public/images/3_sword.png
-./public/images/4_sword.png
-./public/images/5_sword.png
-./public/images/6_sword.png
-./public/images/7_sword.png
-./public/images/8_sword.png
-./public/images/9_sword.png
-./public/images/10_sword.png
-./public/images/J_sword.png
-./public/images/Q_sword.png
-./public/images/K_sword.png
+### Mazo de Cartas de la Baraja
 
-./public/images/A_cup.png
-./public/images/2_cup.png
-./public/images/3_cup.png
-./public/images/4_cup.png
-./public/images/5_cup.png
-./public/images/6_cup.png
-./public/images/7_cup.png
-./public/images/8_cup.png
-./public/images/9_cup.png
-./public/images/10_cup.png
-./public/images/J_cup.png
-./public/images/Q_cup.png
-./public/images/K_cup.png
+<p>
+  <img src="./public/images/A_sword.png" width="60" />
+  <img src="./public/images/2_sword.png" width="60" />
+  <img src="./public/images/3_sword.png" width="60" />
+  <img src="./public/images/4_sword.png" width="60" />
+  <img src="./public/images/5_sword.png" width="60" />
+  <img src="./public/images/6_sword.png" width="60" />
+  <img src="./public/images/7_sword.png" width="60" />
+  <img src="./public/images/8_sword.png" width="60" />
+  <img src="./public/images/9_sword.png" width="60" />
+  <img src="./public/images/10_sword.png" width="60" />
+  <img src="./public/images/J_sword.png" width="60" />
+  <img src="./public/images/Q_sword.png" width="60" />
+  <img src="./public/images/K_sword.png" width="60" />
+</p>
 
-./public/images/A_coin.png
-./public/images/2_coin.png
-./public/images/3_coin.png
-./public/images/4_coin.png
-./public/images/5_coin.png
-./public/images/6_coin.png
-./public/images/7_coin.png
-./public/images/8_coin.png
-./public/images/9_coin.png
-./public/images/10_coin.png
-./public/images/J_coin.png
-./public/images/Q_coin.png
-./public/images/K_coin.png
+### Muestra de la Mano del Jugador (Cartas Aleatorias)
 
-./public/images/A_club.png
-./public/images/2_club.png
-./public/images/3_club.png
-./public/images/4_club.png
-./public/images/5_club.png
-./public/images/6_club.png
-./public/images/7_club.png
-./public/images/8_club.png
-./public/images/9_club.png
-./public/images/10_club.png
-./public/images/J_club.png
-./public/images/Q_club.png
-./public/images/K_club.png) | ![Ejemplo de Mano](./public/images/7_sword.png
-./public/images/K_cup.png
-./public/images/4_coin.png
-./public/images/J_club.png
-./public/images/A_sword.png
-./public/images/9_cup.png
-./public/images/2_coin.png
-./public/images/Q_club.png
-./public/images/5_sword.png
-./public/images/10_cup.png
-./public/images/3_coin.png
-./public/images/8_club.png) |
+<p>
+  <img src="./public/images/7_sword.png" width="60" />
+  <img src="./public/images/K_cup.png" width="60" />
+  <img src="./public/images/4_coin.png" width="60" />
+  <img src="./public/images/J_club.png" width="60" />
+  <img src="./public/images/A_sword.png" width="60" />
+  <img src="./public/images/9_cup.png" width="60" />
+  <img src="./public/images/2_coin.png" width="60" />
+  <img src="./public/images/Q_club.png" width="60" />
+  <img src="./public/images/5_sword.png" width="60" />
+  <img src="./public/images/10_cup.png" width="60" />
+  <img src="./public/images/3_coin.png" width="60" />
+  <img src="./public/images/8_club.png" width="60" />
+</p>
 
 ---
 
