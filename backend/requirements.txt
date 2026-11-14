@@ -1,6 +1,0 @@
-Django>=5.2,<5.3
-djangorestframework>=3.16,<3.17
-django-cors-headers>=4.7,<5
-channels>=4.2,<5
-daphne>=4.2,<5
-channels-redis>=4.2,<5
