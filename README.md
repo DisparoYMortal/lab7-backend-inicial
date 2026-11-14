@@ -1,230 +1,153 @@
-# Proyecto Final: Juego de Cariocas (React + Django)
+# Cariocas Web — React + Django
 
-**Universidad Autónoma de Chile**  
-**Carrera:** Ingeniería Civil Informática  
-**Asignatura:** Desarrollo de Aplicaciones Web (Nivel 5)  
+Proyecto de Cariocas con frontend React/Vite y backend Django REST + WebSockets.
 
----
+## Requisitos
+- Python 3.10+
+- Node.js 20.19+ (Vite 8)
+- npm
 
-## 1. Descripción del Proyecto
+## 1. Backend (Arch Linux / Linux)
 
-Este proyecto consiste en una aplicación web full-stack orientada al juego de cartas **Cariocas**. El sistema cuenta con una arquitectura desacoplada donde el cliente interactúa mediante una interfaz web construida en **React** (utilizando Vite), consumiendo servicios de una API RESTful desarrollada en **Django** con **Django REST Framework (DRF)**. Toda la persistencia de datos del juego se gestiona mediante **SQLite**.
+Desde la raíz del proyecto:
 
-La aplicación abarca el ciclo completo de interacción: autenticación de usuarios, gestión de partidas, control de la baraja y conteo de puntajes por ronda.
-
-### Tecnologías Utilizadas
-
-* **Frontend:** React, JavaScript (ES6+), Vite, Fetch API / Axios, HTML5, CSS3.
-* **Backend:** Python 3.x, Django, Django REST Framework (DRF), `django-cors-headers`.
-* **Base de Datos:** SQLite.
-* **Control de Versiones:** Git y GitHub.
-
----
-
-## 2. Asignación de Roles y Arquitectura de Desarrollo
-
-El sistema está dividido operacionalmente según las responsabilidad de cada capa:
-
-| Capa / Módulo | Responsabilidades Clave | Tecnologías |
-| :--- | :--- | :--- |
-| **Frontend (Cliente)** | • Interfaz dinámica de usuario e interacción de cartas.<br>• Generación de la mano, renderizado del mazo y vista de juegos.<br>• Consumo de endpoints RESTful usando `async/await`.<br>• Manejo de sesión de usuario y rutas protegidas en React. | React, JavaScript, Vite, CSS |
-| **Backend (Servidor)** | • Definición y migración de los modelos de datos (Usuarios, Partidas, Puntuaciones).<br>• Serialización de datos y validaciones de negocio en DRF.<br>• Exposición de endpoints RESTful con verbos HTTP apropiados.<br>• Seguridad mediante hashing de contraseñas y autenticación por tokens/sesión.<br>• Configuración de encabezados CORS para el cliente. | Python, Django, DRF, SQLite |
-
----
-
-## 3. Demostración Visual (Cartas del Juego)
-
-A continuación se muestra el diseño visual de las cartas del juego de Cariocas integradas en la interfaz:
-
-### Mazo Completo de Cartas (52 Cartas + 2 JOKER)
-
-**Espadas (Swords):**
-<p>
-  <img src="./public/images/A_sword.png" width="50" />
-  <img src="./public/images/2_sword.png" width="50" />
-  <img src="./public/images/3_sword.png" width="50" />
-  <img src="./public/images/4_sword.png" width="50" />
-  <img src="./public/images/5_sword.png" width="50" />
-  <img src="./public/images/6_sword.png" width="50" />
-  <img src="./public/images/7_sword.png" width="50" />
-  <img src="./public/images/8_sword.png" width="50" />
-  <img src="./public/images/9_sword.png" width="50" />
-  <img src="./public/images/10_sword.png" width="50" />
-  <img src="./public/images/J_sword.png" width="50" />
-  <img src="./public/images/Q_sword.png" width="50" />
-  <img src="./public/images/K_sword.png" width="50" />
-</p>
-
-**Copas (Cups):**
-<p>
-  <img src="./public/images/A_cups.png" width="50" />
-  <img src="./public/images/2_cups.png" width="50" />
-  <img src="./public/images/3_cups.png" width="50" />
-  <img src="./public/images/4_cups.png" width="50" />
-  <img src="./public/images/5_cups.png" width="50" />
-  <img src="./public/images/6_cups.png" width="50" />
-  <img src="./public/images/7_cups.png" width="50" />
-  <img src="./public/images/8_cups.png" width="50" />
-  <img src="./public/images/9_cups.png" width="50" />
-  <img src="./public/images/10_cups.png" width="50" />
-  <img src="./public/images/J_cups.png" width="50" />
-  <img src="./public/images/Q_cups.png" width="50" />
-  <img src="./public/images/K_cups.png" width="50" />
-</p>
-
-**Monedas (Coins):**
-<p>
-  <img src="./public/images/A_coins.png" width="50" />
-  <img src="./public/images/2_coins.png" width="50" />
-  <img src="./public/images/3_coins.png" width="50" />
-  <img src="./public/images/4_coins.png" width="50" />
-  <img src="./public/images/5_coins.png" width="50" />
-  <img src="./public/images/6_coins.png" width="50" />
-  <img src="./public/images/7_coins.png" width="50" />
-  <img src="./public/images/8_coins.png" width="50" />
-  <img src="./public/images/9_coins.png" width="50" />
-  <img src="./public/images/10_coins.png" width="50" />
-  <img src="./public/images/J_coins.png" width="50" />
-  <img src="./public/images/Q_coins.png" width="50" />
-  <img src="./public/images/K_coins.png" width="50" />
-</p>
-
-**Tréboles (Clubs):**
-<p>
-  <img src="./public/images/A_clubs.png" width="50" />
-  <img src="./public/images/2_clubs.png" width="50" />
-  <img src="./public/images/3_clubs.png" width="50" />
-  <img src="./public/images/4_clubs.png" width="50" />
-  <img src="./public/images/5_clubs.png" width="50" />
-  <img src="./public/images/6_clubs.png" width="50" />
-  <img src="./public/images/7_clubs.png" width="50" />
-  <img src="./public/images/8_clubs.png" width="50" />
-  <img src="./public/images/9_clubs.png" width="50" />
-  <img src="./public/images/10_clubs.png" width="50" />
-  <img src="./public/images/J_clubs.png" width="50" />
-  <img src="./public/images/Q_clubs.png" width="50" />
-  <img src="./public/images/K_clubs.png" width="50" />
-</p>
-
-### Muestra de la Mano del Jugador
-
-<p>
-  <img src="./public/images/7_sword.png" width="60" />
-  <img src="./public/images/K_cups.png" width="60" />
-  <img src="./public/images/4_coins.png" width="60" />
-  <img src="./public/images/J_clubs.png" width="60" />
-  <img src="./public/images/A_sword.png" width="60" />
-  <img src="./public/images/9_cups.png" width="60" />
-  <img src="./public/images/2_coins.png" width="60" />
-  <img src="./public/images/Q_clubs.png" width="60" />
-  <img src="./public/images/5_sword.png" width="60" />
-  <img src="./public/images/10_cups.png" width="60" />
-  <img src="./public/images/3_coins.png" width="60" />
-  <img src="./public/images/8_clubs.png" width="60" />
-</p>
-
-**JOKERS:**
-<p>
-  <img src="./public/images/JOKER.png" width="60" />
-  <img src="./public/images/JOKER1.png" width="60" />
-</p>
-
-
-
----
-
-## 4. Endpoints de la API REST
-
-El backend en Django REST Framework expone la interfaz de comunicación para el cliente siguiendo los estándares RESTful:
-
-| Recurso | Método HTTP | URL | Descripción | Código HTTP Esperado |
-| :--- | :---: | :--- | :--- | :---: |
-| **Autenticación** | `POST` | `/api/login/` | Autentica al usuario y entrega token/sesión | `200 OK` / `401 Unauthorized` |
-| **Partidas** | `GET` | `/api/partidas/` | Obtiene el listado de partidas activas | `200 OK` |
-| **Partida Detalle** | `GET` | `/api/partidas/<id>/` | Obtiene el estado detallado de una partida | `200 OK` / `404 Not Found` |
-| **Crear Partida** | `POST` | `/api/partidas/` | Crea una nueva partida con validaciones de datos | `201 Created` / `400 Bad Request` |
-| **Actualizar Partida**| `PUT` / `PATCH` | `/api/partidas/<id>/` | Modifica el estado o puntuación de una partida | `200 OK` / `400 Bad Request` |
-| **Eliminar Partida** | `DELETE` | `/api/partidas/<id>/` | Elimina un registro de partida en la BD | `204 No Content` |
-
----
-
-## 5. Autenticación y Manejo de Errores REST
-
-### Autenticación
-* El sistema implementa login mediante credenciales encriptadas (Django maneja las contraseñas con algoritmos de hash seguros).
-* Los endpoints del CRUD de partidas requieren autenticación (`IsAuthenticated`). La realización de peticiones sin credenciales válidas retorna respuestas HTTP `401 Unauthorized` o `403 Forbidden`.
-* En el frontend React se incluye control de vistas y funcionalidad para el cierre de sesión.
-
-### Respuestas de Error REST
-* **400 Bad Request:** Formatos JSON devueltos con detalles sobre campos inválidos o ausentes en el serializador.
-* **401 / 403 Unauthorized:** Rechazo en la ejecución de métodos del CRUD sin credenciales válidas.
-* **404 Not Found:** Recurso inexistente solicitado mediante su identificador.
-
----
-
-## 6. Configuración e Instalación Local
-
-Para ejecutar ambos servidores (React y Django) de manera local en tu equipo, sigue las siguientes instrucciones:
-
-### Requisitos Previos
-* Node.js (v18+) y `npm`.
-* Python (v3.10+) y `pip`.
-
----
-
-### Paso 1: Configurar el Backend (Django)
-
-1. Ingresa a la carpeta del backend:
-   ```bash
-   cd backend
-   ```
-2. Crea y activa un entorno virtual de Python:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # En Linux/macOS
-   # venv\Scripts\activate    # En Windows
-   ```
-3. Instala las dependencias necesarias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Aplica las migraciones a la base de datos SQLite:
-   ```bash
-   python manage.py migrate
-   ```
-5. Inicia el servidor de desarrollo en Django (puerto `http://127.0.0.1:8000`):
-   ```bash
-   python manage.py runserver
-   ```
-
----
-
-### Paso 2: Configurar el Frontend (React + Vite)
-
-1. En una nueva terminal, navega a la raíz o carpeta del cliente:
-   ```bash
-   cd cariocas-web
-   ```
-2. Instala las dependencias del proyecto:
-   ```bash
-   npm install
-   ```
-3. Inicia el servidor de desarrollo del cliente:
-   ```bash
-   npm run dev
-   ```
-4. Abre tu navegador e ingresa a la ruta indicada por Vite (habitualmente `http://localhost:5173`).
-
----
-
-### Paso 3: Configuración de CORS
-
-El backend utiliza `django-cors-headers` configurado en `settings.py` para permitir la comunicación únicamente con la URL de desarrollo de React:
-
-```python
-# settings.py (Django)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser   # opcional: panel admin
+python manage.py runserver 0.0.0.0:8000
 ```
+
+El backend usa SQLite para desarrollo. Las variables de entorno están documentadas en `backend/.env.example`. Para despliegue configura `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, una base de datos persistente y `REDIS_URL` (Redis es necesario para distribuir eventos WebSocket entre varios procesos).
+
+## 2. Frontend
+
+En otra terminal, desde la raíz:
+
+```bash
+npm install
+npm run dev
+```
+
+Frontend: http://localhost:5173  
+API: http://127.0.0.1:8000/api/
+
+El menú principal permite elegir **Multijugador local**, **Contra el bot** o **Multijugador online**. El modo local original se conserva. Si alojas la API en otro dominio, inicia Vite con `VITE_API_URL=https://tu-api.example`.
+
+## Autenticación
+
+Todas las rutas de juego requieren token. Incluye el token así:
+
+```http
+Authorization: Token TU_TOKEN
+Content-Type: application/json
+```
+
+Crear cuenta:
+```bash
+curl -X POST http://127.0.0.1:8000/api/auth/register/ \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"jugador1","password":"una-clave-segura"}'
+```
+
+Iniciar sesión:
+```bash
+curl -X POST http://127.0.0.1:8000/api/auth/login/ \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"jugador1","password":"una-clave-segura"}'
+```
+
+Jugar como invitado:
+```bash
+curl -X POST http://127.0.0.1:8000/api/auth/guest/
+```
+La respuesta contiene `token` y `username`. El invitado queda almacenado como cuenta anónima local; no debe considerarse una cuenta recuperable. Si aparece un error de base de datos, ejecuta primero `python manage.py migrate` en el backend.
+
+## API de partidas
+
+- `POST /api/rooms/` `{ "mode": "bot" }` crea una partida contra bot.
+- `POST /api/rooms/` `{ "mode": "online", "is_public": false }` crea una sala privada; usa `true` para una sala pública.
+- `GET /api/rooms/public/` lista salas públicas esperando jugadores.
+- `POST /api/rooms/CODIGO/join/` entra a una sala (2–4 jugadores).
+- `POST /api/rooms/CODIGO/start/` el anfitrión inicia.
+- `GET /api/rooms/CODIGO/` obtiene estado privado de la partida.
+- `POST /api/rooms/CODIGO/action/` ejecuta acciones:
+  - `{ "action":"draw", "data":{"source":"stock"} }`
+  - `{ "action":"draw", "data":{"source":"discard"} }`
+  - `{ "action":"lay_contract", "data":{"groups":[["uid1","uid2","uid3"],["uid4","uid5","uid6"]] } }`
+  - `{ "action":"add_cards", "data":{"meld_index":0,"card_uids":["uid"]} }`
+  - `{ "action":"discard", "data":{"card_uid":"uid"} }`
+- `POST /api/rooms/CODIGO/next-round/` avanza el anfitrión tras finalizar la ronda. En la ronda 9 envía `{"special_choice":"loca"}` (o `primavera` / `real`).
+- `POST /api/rooms/CODIGO/finish/` finaliza la partida.
+- `GET /api/history/` historial del usuario.
+- `GET /api/stats/` estadísticas.
+
+El estado devuelto oculta las manos de los demás jugadores y solo expone la mano del usuario autenticado.
+
+## Tiempo real
+
+Conecta por WebSocket usando el token:
+
+```js
+const socket = new WebSocket(
+  `ws://127.0.0.1:8000/ws/rooms/${code}/?token=${token}`
+);
+socket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if (message.type === "state") setGameState(message.state);
+};
+```
+
+Cuando una acción REST cambia la partida, el servidor emite un evento y todos los miembros reciben su propia vista privada actualizada.
+
+## Reglas y motor del bot
+
+El motor de `src/bot_engine/` se conserva y se usa desde Django:
+- 2 mazos estándar y 4 comodines.
+- Tríos por valor y escalas normales de 4 cartas.
+- Contratos 1–8 y una ronda 9 que permite elegir Escala loca, Primavera o Escala real.
+- Para bajar un contrato se deben completar todos los grupos simultáneamente.
+- No se permiten comodines en contratos especiales.
+- La IA es heurística inicial, no una IA competitiva.
+
+## Pruebas
+
+Desde la raíz del proyecto:
+
+```bash
+PYTHONPATH=src python -m unittest discover -s src/tests -v
+PYTHONPATH=src python -m unittest discover -s backend/tests -v
+```
+
+## Alcance y limitaciones
+
+El botón nuevo abre una interfaz online conectada a la API; la interfaz local original se conserva. El cliente incluye un menú para elegir modo, acceso con inicio de sesión/registro/invitado, creación de salas públicas o privadas, listado de salas públicas, unirse por código, iniciar, robar, preparar y bajar contratos completos, pegar cartas, descartar, avanzar rondas y consultar historial/estadísticas. El motor del bot juega turnos automáticamente con una estrategia heurística sencilla.
+
+La sincronización WebSocket de desarrollo usa la capa en memoria; para varios procesos o despliegue público configura Redis. Antes de publicar el juego, añade HTTPS/WSS, una clave secreta segura, hosts/orígenes permitidos, una base de datos de producción y límites de solicitudes. Los invitados son cuentas anónimas temporales y no se pueden recuperar si se pierde su token.
+
+La ejecución del frontend se verificó con `npm run build`; los tests Python del motor y del ciclo de turnos pasaron. En este entorno no fue posible instalar Django desde internet, así que debes ejecutar `pip install -r requirements.txt`, migraciones y una prueba manual de API en tu equipo para validar el entorno Django instalado.
+
+
+## Actualización: bots, acceso inicial y tema visual
+
+- La pantalla de acceso aparece antes del menú principal: iniciar sesión, crear cuenta o continuar como invitado.
+- En el modo contra bots se puede elegir entre 1 y 4 bots (2 a 5 participantes en total).
+- Los bots juegan en orden y el turno vuelve al usuario después del último bot.
+- Un bot que ya bajó su contrato intenta añadir cartas legalmente a las combinaciones de la mesa, incluidas las de otros participantes.
+- La interfaz comparte una paleta de madera oscura, rojo sangre, oro envejecido y plata.
+
+### Actualizar una instalación existente
+
+Descomprime esta versión sobre la carpeta del proyecto. El ZIP no incluye `backend/db.sqlite3`, `.venv` ni `node_modules`, para evitar sobrescribir tu base de datos o tus entornos locales.
+
+Si cambió alguna dependencia de frontend, desde la raíz ejecuta:
+
+```bash
+npm install
+npm run dev
+```
+
+Mantén Django activo en otra terminal como ya lo tienes configurado.

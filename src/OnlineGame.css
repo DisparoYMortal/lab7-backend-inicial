@@ -1,0 +1,134 @@
+.online-shell{min-height:100vh;background:#111a18;color:#edf3ed;padding:28px;box-sizing:border-box;font-family:inherit}
+.online-header{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1100px;margin:0 auto 24px}
+.online-header h1{margin:0;color:#e3c36b;font-size:clamp(24px,4vw,36px)}
+.online-header small{color:#aabbb1}
+.online-panel{max-width:1000px;margin:18px auto;background:#1d2b26;border:1px solid #42574b;border-radius:14px;padding:22px;box-shadow:0 12px 30px #0004}
+.auth-panel{max-width:460px}
+.online-panel h2{color:#e3c36b;margin:4px 0 16px}
+.online-panel label{display:block;margin:12px 0;color:#c8d4cc}
+.online-panel input,.online-panel select{background:#101a16;color:#f3f5ef;border:1px solid #58705f;border-radius:8px;padding:11px 12px;font:inherit;min-width:0}
+.online-panel label input{display:block;width:100%;box-sizing:border-box;margin-top:6px}
+.online-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.online-shell button{background:#b99b4e;color:#172019;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+.online-shell button:disabled{opacity:.4;cursor:not-allowed}
+.online-shell .online-secondary{background:#33473d;color:#e4eee6;border:1px solid #617568}
+.room-title,.game-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.game-meta{background:#101a16;padding:12px;border-radius:8px;color:#e6d18d}
+.players-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.player-chip{background:#2b3b33;border:1px solid #506456;padding:10px 14px;border-radius:9px;min-width:130px;display:flex;flex-direction:column;gap:4px}
+.player-chip small{color:#b5c2b8}
+.player-chip.active{border-color:#e3c36b;box-shadow:0 0 0 1px #e3c36b}
+.table-area{background:#14221c;border-radius:10px;padding:14px;margin:14px 0}
+.melds-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.meld-box{background:#263a30;border:1px solid #52695b;border-radius:8px;padding:10px;max-width:100%;overflow-wrap:anywhere}
+.meld-box button{margin-top:8px}
+.hand-grid{display:flex;gap:9px;flex-wrap:wrap}
+.online-card{background:#f4f0e6!important;color:#202820!important;border:3px solid transparent!important;border-radius:9px!important;padding:6px!important;width:76px;height:112px;display:flex;flex-direction:column;justify-content:space-between;align-items:center}
+.online-card img{width:100%;height:78px;object-fit:contain}
+.online-card span{font-size:11px}
+.online-card.chosen{border-color:#e3bd48!important;transform:translateY(-6px)}
+.inner-panel{background:#14221c;box-shadow:none;padding:14px}
+.online-message{max-width:1000px;margin:14px auto;color:#f3d98b;background:#3c3420;border-radius:8px;padding:12px}
+@media(max-width:600px){.online-shell{padding:14px}.online-header{align-items:flex-start;flex-wrap:wrap}.online-panel{padding:15px}.online-card{width:62px;height:96px}.online-card img{height:64px}}
+
+.history-list{margin-top:16px;border-top:1px solid #52695b;padding-top:12px}
+.history-line{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 0;color:#d9e5db;border-bottom:1px solid #34483d}
+.history-line small{color:#aabbb1}
+
+.auth-heading p,.auth-note{color:#aebdb2;line-height:1.5}
+.auth-tabs{display:flex;gap:8px;border-bottom:1px solid #405449;margin:16px 0}
+.online-shell .auth-tab{background:transparent;color:#b9c9bd;border-radius:8px 8px 0 0;border-bottom:2px solid transparent}
+.online-shell .auth-tab.active{color:#e3c36b;border-bottom-color:#e3c36b}
+.auth-buttons>*{flex:1}
+.visibility-choice{display:flex!important;flex-direction:column;gap:6px;min-width:min(100%,250px)}
+.public-rooms{background:#14221c;border:1px solid #405449;border-radius:10px;padding:14px;margin:18px 0}
+.public-rooms h3{margin:0;color:#e3c36b}
+.public-room-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #34483d}
+.public-room-row span{display:flex;flex-direction:column;gap:4px}
+.public-room-row small{color:#aabbb1}
+@media(max-width:600px){.auth-buttons{flex-direction:column}.public-room-row{align-items:flex-start}}
+
+
+/* Cariocas shared visual language */
+.online-shell {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(125,32,40,.28), transparent 48%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #281710, #100b09 68%, #1c0d0e);
+  color: #e8dfd0;
+}
+.online-header h1 { color: #e0c47b; font-family: 'Cinzel', Georgia, serif; letter-spacing: .08em; }
+.online-header small { color: #b9aa98; }
+.online-panel {
+  background: linear-gradient(145deg, rgba(62,41,29,.97), rgba(25,15,12,.98));
+  border: 1px solid #8a7047;
+  border-radius: 7px;
+  box-shadow: 0 14px 36px #0009, inset 0 1px #ffffff10;
+}
+.online-panel h2, .public-rooms h3 { color: #e0c47b; font-family: 'Cinzel', Georgia, serif; }
+.online-panel label { color: #d4c6b3; }
+.online-panel input, .online-panel select {
+  background: #160e0b;
+  color: #eee3d2;
+  border: 1px solid #777b7c;
+  border-radius: 4px;
+}
+.online-shell button {
+  background: linear-gradient(145deg, #dfc27a, #a17c3c);
+  color: #21150e;
+  border: 1px solid #f0d994;
+  border-radius: 4px;
+  box-shadow: inset 0 1px #ffffff44, 0 2px 5px #0007;
+}
+.online-shell .online-secondary {
+  background: linear-gradient(145deg, #4a3025, #251711);
+  color: #e8dfd0;
+  border: 1px solid #899197;
+}
+.online-shell .auth-tab { background: transparent; color: #b9aa98; border-bottom-color: transparent; box-shadow: none; }
+.online-shell .auth-tab.active { color: #e0c47b; border-bottom-color: #a52b35; }
+.player-chip, .meld-box, .table-area, .inner-panel, .public-rooms {
+  background: linear-gradient(145deg, #38251b, #1b110e);
+  border: 1px solid #806744;
+  color: #e8dfd0;
+}
+.player-chip.active { border-color: #e0c47b; box-shadow: 0 0 0 1px #e0c47b55; }
+.player-chip small, .public-room-row small, .auth-note { color: #b9aa98; }
+.online-card { border-color: #c5a45a !important; }
+.online-message { background: #4a2021; border: 1px solid #a34a43; color: #f1dca5; }
+.history-list { border-color: #806744; }
+.history-line { color: #d8cbb8; border-color: #49352a; }
+
+.online-opponent-cards {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 5px;
+  padding-left: 3px;
+}
+.online-opponent-cards img {
+  width: 22px;
+  height: 32px;
+  object-fit: fill;
+  border: 1px solid #c5a45a;
+  border-radius: 3px;
+  margin-left: -8px;
+}
+.online-opponent-cards img:first-child { margin-left: 0; }
+.online-piles {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.online-stock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.online-stock img {
+  width: 48px;
+  height: 68px;
+  object-fit: fill;
+  border: 1px solid #c5a45a;
+  border-radius: 5px;
+}
