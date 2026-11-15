@@ -1,3 +1,4 @@
+"""Pruebas de contratos, combinaciones, Jokers y decisiones básicas del bot."""
 import unittest
 from bot_engine.cards import Card, Suit, standard_deck
 from bot_engine.combinations import is_trio, is_sequence
@@ -20,6 +21,17 @@ class RulesTests(unittest.TestCase):
         cards = [Card(5, Suit.HEARTS), Card(6, Suit.HEARTS), Card(7, Suit.HEARTS), Card(8, Suit.HEARTS)]
         self.assertTrue(is_sequence(cards))
 
+
+    def test_normal_sequence_q_k_ace_two_same_suit(self):
+        cards = [Card(12, Suit.HEARTS), Card(13, Suit.HEARTS),
+                 Card(1, Suit.HEARTS), Card(2, Suit.HEARTS)]
+        self.assertTrue(is_sequence(cards))
+
+    def test_normal_sequence_k_ace_two_three_same_suit(self):
+        cards = [Card(13, Suit.HEARTS), Card(1, Suit.HEARTS),
+                 Card(2, Suit.HEARTS), Card(3, Suit.HEARTS)]
+        self.assertTrue(is_sequence(cards))
+
     def test_normal_sequence_different_suits_rejected(self):
         cards = [Card(5, Suit.HEARTS), Card(6, Suit.CLUBS), Card(7, Suit.HEARTS), Card(8, Suit.HEARTS)]
         self.assertFalse(is_sequence(cards))
@@ -27,6 +39,12 @@ class RulesTests(unittest.TestCase):
     def test_joker_completes_normal_scale(self):
         cards = [Card(5, Suit.HEARTS), Card(6, Suit.HEARTS), Card(None, None, joker_id=0), Card(8, Suit.HEARTS)]
         self.assertTrue(is_sequence(cards))
+
+
+    def test_normal_sequence_rejects_two_jokers(self):
+        cards = [Card(5, Suit.HEARTS), Card(6, Suit.HEARTS),
+                 Card(None, None, joker_id=0), Card(None, None, joker_id=1)]
+        self.assertFalse(is_sequence(cards))
 
     def test_special_contracts_require_13_and_no_jokers(self):
         hand = [Card(rank, Suit.HEARTS, 0) for rank in range(1, 14)]

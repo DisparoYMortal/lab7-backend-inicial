@@ -1,3 +1,9 @@
+"""Evaluación de progreso, selección de robos y descarte estratégico.
+
+El planificador compara subconjuntos de la mano y maximiza el avance real hacia
+el contrato, evitando contabilizar una carta como parte de dos grupos distintos.
+"""
+
 from collections import Counter
 from itertools import combinations
 from .contracts import get_contract, meld_size, enumerate_contract_plans
@@ -6,6 +12,8 @@ from .cards import RED_SUITS
 
 def _candidate_groups(hand, kind, target_size, scale_length):
     """Grupos completos o parciales que realmente pueden convertirse en el contrato."""
+    # Primero genera subconjuntos que respetan ya las restricciones básicas del tipo de grupo.
+    # Los grupos parciales se usan para estimar progreso, nunca se presentan como contrato terminado.
     found = []
     if kind == "trio":
         for size in (2, 3):
@@ -61,32 +69,40 @@ def _candidate_groups(hand, kind, target_size, scale_length):
 
 def progress_score(hand, contract_id, normal_scale_length=4):
     """Puntúa cartas útiles para el contrato objetivo, evitando contar una carta dos veces."""
+    # PASO 1: prepara un conjunto de grupos candidatos para cada grupo exigido por el contrato.
     contract = get_contract(contract_id)
     pools = []
     for kind in contract.melds:
         target = meld_size(kind, normal_scale_length)
         pools.append(_candidate_groups(hand, kind, target, normal_scale_length))
+    # PASO 2: explora combinaciones de candidatos con búsqueda recursiva.
+    # `used` contiene los identificadores de cartas ya asignadas a grupos previos.
     best = 0
     def visit(i, used, score):
         nonlocal best
         if i == len(pools):
             best = max(best, score)
             return
+        # PASO 3: permite no asignar cartas a este grupo, para evaluar manos aún incompletas.
         visit(i + 1, used, score)
+        # PASO 4: prueba cada grupo candidato que no comparta cartas con los ya elegidos.
         for meld in pools[i]:
             ids = {c.uid for c in meld.cards}
             if ids.isdisjoint(used):
                 # Prioriza grupos próximos a completarse, pero premia cada carta útil.
                 target = meld_size(meld.kind, normal_scale_length)
                 bonus = 0.35 if len(meld.cards) == target else 0
+                # PASO 5: suma una bonificación pequeña si el grupo ya está completo.
                 visit(i + 1, used | ids, score + len(ids) + bonus)
     visit(0, set(), 0)
     return best
 
 def discard_value(card, hand_after_draw, contract_id, normal_scale_length=4):
+    # Un Joker es un recurso flexible y casi nunca conviene descartarlo voluntariamente.
     if card.is_joker:
         return -1000
     remaining = [c for c in hand_after_draw if c.uid != card.uid]
+    # Compara el progreso antes y después de retirar la carta candidata.
     before = progress_score(hand_after_draw, contract_id, normal_scale_length)
     after = progress_score(remaining, contract_id, normal_scale_length)
     # Valor bajo = mejor descarte; evita desprenderse de cartas que sostienen el progreso.
@@ -99,6 +115,7 @@ def choose_best_discard(hand, contract_id, normal_scale_length=4):
 
 def choose_draw_source(hand, discard_top, contract_id, normal_scale_length=4):
     """Toma el descarte solo si mejora el progreso del contrato."""
+    # Si no existe carta visible, la única opción válida es robar del mazo.
     if discard_top is None:
         return "stock"
     current = progress_score(hand, contract_id, normal_scale_length)

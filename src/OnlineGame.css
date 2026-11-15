@@ -1,3 +1,4 @@
+/* Estilos de autenticación, salas online, mesa remota y resultados finales. */
 .online-shell{min-height:100vh;background:#111a18;color:#edf3ed;padding:28px;box-sizing:border-box;font-family:inherit}
 .online-header{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1100px;margin:0 auto 24px}
 .online-header h1{margin:0;color:#e3c36b;font-size:clamp(24px,4vw,36px)}
@@ -131,4 +132,142 @@
   object-fit: fill;
   border: 1px solid #c5a45a;
   border-radius: 5px;
+}
+
+/* La mesa remota comparte el fondo y el lenguaje visual del tablero local. */
+.online-game-room:has(.game-meta) {
+  position:relative; width:100%; max-width:none; min-height:100vh; margin:0; padding:18px;
+  border:0; border-radius:0; box-sizing:border-box; color:#f4ead4;
+  background-color:#1a100c;
+  background-image:linear-gradient(180deg,rgba(10,6,5,.58),rgba(12,7,6,.30) 45%,rgba(8,5,4,.72)),url('/images/Mesa.png');
+  background-size:100% 100%; background-position:center; background-repeat:no-repeat;
+}
+.online-game-room:has(.game-meta) .game-meta,
+.online-game-room:has(.game-meta) .players-row,
+.online-game-room:has(.game-meta) .table-area {background:rgba(12,8,6,.48);border:1px solid rgba(197,164,90,.42);color:#f4ead4}
+.online-game-room:has(.game-meta) .player-chip {background:linear-gradient(145deg,rgba(63,42,29,.9),rgba(26,17,14,.94));border-color:rgba(197,164,90,.65);color:#fff}
+.online-game-room:has(.game-meta) .table-area {min-height:220px}
+.online-game-room:has(.game-meta) .meld-box {background:linear-gradient(145deg,rgba(63,42,29,.9),rgba(26,17,14,.94));border-color:rgba(197,164,90,.75)}
+.online-meld-cards {display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin-top:8px}
+.online-meld-cards img {width:48px;height:68px;object-fit:contain;border-radius:4px;box-shadow:0 2px 6px #0008}
+.online-game-room:has(.game-meta) .online-card {width:76px;height:112px;padding:4px!important;background:#f4f0e6!important;border:2px solid #d1b66a!important}
+.online-game-room:has(.game-meta) .online-card img {height:82px;object-fit:contain}
+.online-game-room:has(.game-meta) .online-card.chosen {transform:translateY(-12px);box-shadow:0 0 12px #ffd700}
+.online-game-room:has(.game-meta) .room-title h2 {color:#e3c36b}
+@media(max-width:700px) {
+ .online-game-room:has(.game-meta) {padding:10px;min-height:100vh}
+ .online-meld-cards img {width:38px;height:54px}
+}
+
+/* Tablero online con la misma distribución de mesa, HUD, oponentes y mano que LocalGame. */
+.online-game-room:has(.online-mesa) {position:static;max-width:none;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+.online-game-room:has(.online-mesa) > .room-title {display:none}
+.online-mesa {position:fixed!important;inset:0;width:100vw;height:100vh;z-index:30;overflow:hidden}
+.online-mesa .online-hud-brand {display:flex;align-items:center;gap:12px}
+.online-hud-brand strong {font-size:1.2rem;color:#d4af37}
+.online-turn-label {color:#ffd700;font-size:.9rem;text-align:center}
+.online-hud-buttons {display:flex;gap:6px;flex-wrap:wrap}
+.online-mesa .oponente-card-box {min-width:145px;max-width:270px}
+.online-mesa .oponente-card-box > strong {display:block;font-size:.85rem}
+.online-mesa .oponente-card-box > small {display:block;color:#ccc;font-size:.72rem}
+.online-mesa .zona-central {gap:12px}
+.online-mesa .pila-carta {cursor:pointer}
+.online-contract-tools {display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;color:#f4ead4}
+.online-contract-status {display:flex;gap:14px;justify-content:center;flex-wrap:wrap;background:rgba(0,0,0,.6);padding:6px 12px;border-radius:8px;font-size:.8rem}
+.online-actions-inline {display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.online-mesa .mano-abanico {min-height:110px}
+.online-mesa .carta-mano-wrapper {cursor:pointer}
+.online-mesa .carta-seleccionada {transform:translateY(-16px);filter:drop-shadow(0 0 8px #ffd700)}
+.online-mesa .carta-mano-wrapper img {width:100%;height:100%;object-fit:contain}
+.online-mesa .grupo-cartas-row img {width:48px;height:68px;object-fit:contain}
+.online-score-overlay {position:absolute;inset:0;z-index:1100;display:grid;place-items:center;background:#0009}
+.online-score-box {min-width:250px;padding:20px;background:#211713;border:1px solid #d4af37;border-radius:12px;color:#fff}
+@media(max-width:700px) {
+ .online-mesa {position:fixed!important;overflow-y:auto;height:100dvh}
+ .online-mesa .hud-top {flex-wrap:wrap;gap:8px}
+ .online-mesa .online-hud-buttons {justify-content:center}
+ .online-contract-status {gap:6px}
+ .online-mesa .grupo-cartas-row img {width:36px;height:52px}
+}
+
+
+.online-lobby-hint {
+  margin: 12px 0;
+  padding: 10px 12px;
+  color: #d8cbb8;
+  background: rgba(12,8,6,.42);
+  border-left: 3px solid #c5a45a;
+  line-height: 1.45;
+}
+.online-mesa {
+  background-image: linear-gradient(180deg,rgba(10,6,5,.58),rgba(12,7,6,.30) 45%,rgba(8,5,4,.72)),url('/images/Mesa.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Estadísticas personales: resumen visual y legible. */
+.stats-dashboard{margin:18px 0 6px;padding:18px;background:linear-gradient(135deg,#17251e,#101713);border:1px solid #665632;border-radius:12px;color:#eee5d3}
+.stats-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+.stats-heading span{font-size:10px;letter-spacing:2px;color:#c5a85f;font-weight:800}
+.stats-heading h3{margin:4px 0 0;color:#f1dfae;font-size:19px}
+.stats-heading>strong{font-size:30px;color:#e4c66e;white-space:nowrap}
+.stats-heading>strong small{font-size:11px;color:#b9b09a;font-weight:500}
+.stats-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stats-metrics article{display:flex;flex-direction:column;gap:8px;padding:13px;background:#26352b;border:1px solid #455443;border-radius:9px;min-width:0}
+.stats-metrics article span{font-size:12px;color:#bac5b8}
+.stats-metrics article b{font-size:25px;color:#f0d88e;font-variant-numeric:tabular-nums}
+.stats-progress-label{display:flex;justify-content:space-between;margin:17px 0 7px;font-size:12px;color:#c6cbbb}
+.stats-progress{height:9px;background:#080e0b;border-radius:20px;overflow:hidden;border:1px solid #3c4c3d}
+.stats-progress span{display:block;height:100%;background:linear-gradient(90deg,#8e7134,#e6ca76);border-radius:20px;transition:width .3s ease}
+.stats-footnote{display:block;margin-top:10px;color:#9eaa9e}
+.online-shell .online-pile{display:block;padding:0;background:transparent;border:0;color:inherit;min-width:0;cursor:pointer}
+.online-shell .online-pile:disabled{opacity:.72;cursor:not-allowed}
+.online-shell .online-pile.pile-ready{filter:drop-shadow(0 0 8px #e1c16b88)}
+.online-shell .online-pile.pile-ready:hover{transform:translateY(-4px)}
+.online-shell .online-pile .mazo-dorso,.online-shell .online-pile .descarte-slot{pointer-events:none}
+.carta-mano-wrapper[role="button"]{cursor:pointer;user-select:none}
+.carta-mano-wrapper[role="button"]:focus-visible{outline:2px solid #e4c66e;outline-offset:4px;border-radius:8px}
+.online-turn-label{color:#f1d98f}
+@media(max-width:700px){.stats-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.stats-heading h3{font-size:16px}}
+.online-hand-hint{display:block;margin:7px 0;color:#d5c28d;font-size:11px;text-align:center}
+
+/* El tablero remoto utiliza el mismo HUD y controles del juego contra bots. */
+.online-mesa .hud-top {justify-content:space-between;gap:12px}
+.online-hud-left {display:flex;align-items:center;gap:0;min-width:260px}
+.online-mesa .online-menu-button {background:linear-gradient(145deg,#7d2028,#4a1718);color:#f4ead4;border:1px solid #a34a43;border-radius:6px;padding:6px 12px}
+.online-mesa .contrato-badge {white-space:nowrap}
+.online-mesa .online-turn-label {flex:1;color:#ffd700;font-size:.95rem;text-align:center}
+.online-mesa .btn-hud {background:linear-gradient(145deg,#493025,#251711);color:#e8dfd0;border:1px solid #6f777d;border-radius:6px;padding:6px 12px;font-weight:500}
+.online-mesa .btn-accion {font-weight:bold}
+.online-mesa .barra-acciones {gap:10px}
+.online-mesa .zona-jugador {padding-bottom:14px}
+.online-mesa .mano-abanico {height:125px;min-height:125px}
+.online-mesa .carta-mano-wrapper {width:78px;height:110px;margin-left:-22px}
+.online-mesa .carta-mano-wrapper:first-child {margin-left:0}
+@media(max-width:700px){
+ .online-hud-left {min-width:0;flex-wrap:wrap;gap:5px}
+ .online-mesa .hud-top {justify-content:center}
+ .online-mesa .online-turn-label {order:3;flex-basis:100%}
+}
+
+/* Controles online alineados con la barra de acciones del modo contra bots. */
+.online-mesa .barra-acciones {display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.online-mesa .barra-acciones .btn-hud,
+.online-mesa .barra-acciones .btn-accion {font-family:inherit;font-size:.85rem}
+.online-mesa .barra-acciones .btn-accion {padding:6px 12px;border-radius:6px;font-weight:700}
+.online-mesa .online-contract-preview {display:flex;align-items:center;justify-content:center;gap:12px;max-width:min(90vw,760px);margin:0 auto 7px;padding:5px 10px;background:rgba(0,0,0,.60);border-radius:8px;color:#f4ead4}
+.online-contract-preview > span {font-size:.78rem;white-space:nowrap}
+.online-contract-preview .contract-ready {color:#81c784}
+.online-contract-preview .contract-pending {color:#ffcc00}
+.online-contract-preview-groups {display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center}
+.online-contract-preview-group {text-align:center}
+.online-contract-preview-group small {display:block;color:#81c784;font-size:.68rem;margin-bottom:2px}
+.online-contract-preview-group > div {display:flex;gap:2px}
+.online-contract-preview-group img {width:34px;height:48px;object-fit:contain;border-radius:3px}
+.online-meld-select {max-width:150px;padding:6px 8px;border:1px solid #6f777d;border-radius:6px;background:#251711;color:#e8dfd0}
+@media(max-width:700px){
+ .online-mesa .online-contract-preview {max-width:96vw;gap:6px;padding:4px 6px}
+ .online-contract-preview-group img {width:27px;height:38px}
+ .online-mesa .barra-acciones {gap:6px}
 }

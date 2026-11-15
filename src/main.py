@@ -1,3 +1,4 @@
+"""Ejemplo ejecutable para inspeccionar contratos y decisiones del bot."""
 from bot_engine.cards import Card, Suit
 from bot_engine.hand_analyzer import analyze_hand
 from bot_engine.strategy import CariocasBot

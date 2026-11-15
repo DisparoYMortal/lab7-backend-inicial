@@ -1,3 +1,4 @@
+"""Pruebas de extensiones legales a tríos y escalas que ya están en la mesa."""
 import unittest
 from bot_engine.cards import Card, Suit
 from bot_engine.table import TableMeld, can_add_to_meld, add_card_to_meld
@@ -12,6 +13,15 @@ class TableAdditionTests(unittest.TestCase):
         add_card_to_meld(joker,meld)
         self.assertEqual(meld.assignments["0"]["rank"],4)
         self.assertTrue(can_add_to_meld(Card(9,Suit.CLUBS),meld))
+    def test_can_extend_four_to_seven_by_adding_three_on_left(self):
+        meld=TableMeld("p1","normal",[
+            Card(4,Suit.SPADES),Card(5,Suit.SPADES),Card(6,Suit.SPADES),Card(7,Suit.SPADES)
+        ])
+        three=Card(3,Suit.SPADES)
+        self.assertTrue(can_add_to_meld(three,meld))
+        add_card_to_meld(three,meld)
+        self.assertEqual({c.rank for c in meld.cards}, {3,4,5,6,7})
+
     def test_trio_rejects_second_joker(self):
         meld=TableMeld("p1","trio",[
             Card(5,Suit.CLUBS),Card(5,Suit.HEARTS),Card(None,None,joker_id=0)

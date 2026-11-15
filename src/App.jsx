@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
 
+// Primera baraja física: cada identificador combina rango y palo.
 const baraja1 = [
     "A_sword", "2_sword", "3_sword", "4_sword", "5_sword", "6_sword", "7_sword", "8_sword", "9_sword", "10_sword", "J_sword", "Q_sword", "K_sword",
     "A_cup", "2_cup", "3_cup", "4_cup", "5_cup", "6_cup", "7_cup", "8_cup", "9_cup", "10_cup", "J_cup", "Q_cup", "K_cup",
@@ -8,6 +9,7 @@ const baraja1 = [
     "A_club", "2_club", "3_club", "4_club", "5_club", "6_club", "7_club", "8_club", "9_club", "10_club", "J_club", "Q_club", "K_club"
 ];
 
+// Segunda baraja: el sufijo 1 diferencia las cartas duplicadas.
 const baraja2 = [
     "A_sword1", "2_sword1", "3_sword1", "4_sword1", "5_sword1", "6_sword1", "7_sword1", "8_sword1", "9_sword1", "10_sword1", "J_sword1", "Q_sword1", "K_sword1",
     "A_cup1", "2_cup1", "3_cup1", "4_cup1", "5_cup1", "6_cup1", "7_cup1", "8_cup1", "9_cup1", "10_cup1", "J_cup1", "Q_cup1", "K_cup1",
@@ -15,6 +17,7 @@ const baraja2 = [
     "A_club1", "2_club1", "3_club1", "4_club1", "5_club1", "6_club1", "7_club1", "8_club1", "9_club1", "10_club1", "J_club1", "Q_club1", "K_club1"
 ];
 
+// Contratos estándar y sus cantidades obligatorias de tríos y escalas.
 const CONTRATOS = [
     { id: 1, nombre: "2 Tríos", triosReq: 2, escalasReq: 0 },
     { id: 2, nombre: "1 Trío y 1 Escala", triosReq: 1, escalasReq: 1 },
@@ -27,14 +30,16 @@ const CONTRATOS = [
     { id: 9, nombre: "Rondas Especiales", esEspecial: true, triosReq: 0, escalasReq: 0 }
 ];
 
+// Modalidades especiales de 13 cartas; sus reglas se validan por separado.
 const ESPECIALES = [
     { id: "loca", nombre: "Escala Loca (Sucia)" },
     { id: "primavera", nombre: "Primavera" },
     { id: "real", nombre: "Escala Real (Limpia)" }
 ];
 
-const ORDEN_ESCALA = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+const ORDEN_ESCALA = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2", "3"];
 
+// Valor de penalización de cada carta al cerrar una ronda.
 const calcularValorCarta = (carta) => {
     if (carta.includes("JOKER")) return 30;
     if (carta.startsWith("A_")) return 20;
@@ -44,6 +49,7 @@ const calcularValorCarta = (carta) => {
     return isNaN(valorNum) ? 10 : valorNum;
 };
 
+// Normaliza una carta para que las reglas no dependan del nombre del archivo de imagen.
 const obtenerDetallesCarta = (carta) => {
     if (carta.startsWith("JOKER")) {
         return { esJoker: true, valor: null, palo: null };
@@ -53,6 +59,7 @@ const obtenerDetallesCarta = (carta) => {
     return { esJoker: false, valor: match[1], palo: match[2] };
 };
 
+// Resuelve el recurso visual correspondiente a una carta.
 const obtenerRutaImagen = (carta) => {
     if (carta.startsWith("JOKER")) return carta === "JOKER" || carta === "JOKER_3" ? "/images/JOKER.png" : "/images/JOKER1.png";
 
@@ -64,6 +71,7 @@ const obtenerRutaImagen = (carta) => {
     return `/images/${valor}_${palos[palo]}${duplicado}.png`;
 };
 
+// Comprueba que todas las cartas de un trío compartan rango y que haya como máximo un Joker.
 const esTríoVálido = (cartas) => {
     if (cartas.length < 3) return false;
     let jokersCount = 0;
@@ -85,6 +93,7 @@ const esTríoVálido = (cartas) => {
     return true;
 };
 
+// Comprueba una escala inicial de cuatro cartas contra las ventanas permitidas.
 const esEscalaVálidaInicial = (cartas) => {
     if (cartas.length !== 4) return false;
 
@@ -95,14 +104,19 @@ const esEscalaVálidaInicial = (cartas) => {
     return false;
 };
 
+// Asigna las cuatro posiciones de una escala inicial y permite un Joker como hueco.
 const comprobarSecuenciaConCartas = (cartas, valoresEsperados) => {
     let paloComun = null;
+    let jokers = 0;
 
     for (let i = 0; i < 4; i++) {
         const c = cartas[i];
         const det = obtenerDetallesCarta(c);
 
-        if (!det.esJoker) {
+        if (det.esJoker) {
+            jokers++;
+            if (jokers > 1) return false;
+        } else {
             if (det.valor !== valoresEsperados[i]) return false;
             if (paloComun === null) {
                 paloComun = det.palo;
@@ -111,9 +125,10 @@ const comprobarSecuenciaConCartas = (cartas, valoresEsperados) => {
             }
         }
     }
-    return true;
+    return jokers <= 1 && paloComun !== null;
 };
 
+// Valida si las cartas seleccionadas pueden extender un trío ya bajado.
 const cartasSePuedenAcoplarATrío = (tríoCartas, cartasNuevas) => {
     if (cartasNuevas.length === 0) return false;
     
@@ -144,64 +159,152 @@ const cartasSePuedenAcoplarATrío = (tríoCartas, cartasNuevas) => {
     return true;
 };
 
+// Convierte los rangos impresos en valores numéricos para comparar secuencias.
 const rangoNumericoCarta = (valor) => ({ A: 1, J: 11, Q: 12, K: 13 }[valor] ?? Number(valor));
 
-// Devuelve las cartas ordenadas por el rango que representan. El As puede ser bajo o alto.
-const ordenarCartasDeEscala = (cartas) => [...cartas].sort((a, b) => {
-    const da = obtenerDetallesCarta(a), db = obtenerDetallesCarta(b);
-    const ra = da.esJoker ? 99 : rangoNumericoCarta(da.valor);
-    const rb = db.esJoker ? 99 : rangoNumericoCarta(db.valor);
-    return ra - rb;
-});
+// Encuentra la posición lineal que ocupa cada carta en la escala.
+// Esto distingue A-2-3 de Q-K-A y evita ordenar siempre el As al principio.
+// Busca una asignación ordenada de rangos para cada carta, incluyendo las dos posiciones posibles del As.
+const obtenerPosicionesEscala = (cartas) => {
+    const detalles = cartas.map(obtenerDetallesCarta);
+    const naturales = detalles.map((d, i) => ({ ...d, index: i })).filter(d => !d.esJoker);
+    const jokers = detalles.filter(d => d.esJoker).length;
+    if (!naturales.length || jokers > 1 || new Set(naturales.map(d => d.palo)).size !== 1) return null;
+    const opciones = (valor) => {
+        const rango = rangoNumericoCarta(valor);
+        return rango === 1 ? [1, 14] : rango === 2 ? [2, 15] : rango === 3 ? [3, 16] : [rango];
+    };
+    for (let inicio = 1; inicio <= 13; inicio++) {
+        const objetivo = new Set(Array.from({ length: cartas.length }, (_, i) => inicio + i));
+        const posiciones = new Map();
+        const buscar = (i, usadas) => {
+            if (i === naturales.length) return objetivo.size - usadas.size === jokers;
+            for (const pos of opciones(naturales[i].valor)) {
+                if (!objetivo.has(pos) || usadas.has(pos)) continue;
+                posiciones.set(naturales[i].index, pos);
+                const next = new Set(usadas); next.add(pos);
+                if (buscar(i + 1, next)) return true;
+                posiciones.delete(naturales[i].index);
+            }
+            return false;
+        };
+        if (buscar(0, new Set())) {
+            const libres = [...objetivo].filter(pos => ![...posiciones.values()].includes(pos));
+            detalles.forEach((d, i) => { if (d.esJoker) posiciones.set(i, libres.shift() ?? 99); });
+            return posiciones;
+        }
+    }
+    return null;
+};
 
+// Ordena las cartas según las posiciones que ocupan en la secuencia encontrada.
+const ordenarCartasDeEscala = (cartas) => {
+    const posiciones = obtenerPosicionesEscala(cartas);
+    return [...cartas].sort((a, b) => {
+        const ia = cartas.indexOf(a), ib = cartas.indexOf(b);
+        if (posiciones) return posiciones.get(ia) - posiciones.get(ib);
+        const da = obtenerDetallesCarta(a), db = obtenerDetallesCarta(b);
+        return (da.esJoker ? 99 : rangoNumericoCarta(da.valor)) -
+            (db.esJoker ? 99 : rangoNumericoCarta(db.valor));
+    });
+};
+
+// Valida escalas completas, permitiendo el As bajo o alto y un único Joker.
 const esSecuenciaValidaCompleta = (cartas) => {
     const n = cartas.length;
     if (n < 4 || n > 13) return false;
     const naturales = cartas.map(obtenerDetallesCarta).filter(d => !d.esJoker);
-    if (!naturales.length || new Set(naturales.map(d => d.palo)).size !== 1) return false;
-    const ranks = naturales.map(d => rangoNumericoCarta(d.valor));
-    if (new Set(ranks).size !== ranks.length) return false;
+    const jokers = cartas.length - naturales.length;
+    if (jokers > 1 || !naturales.length || new Set(naturales.map(d => d.palo)).size !== 1) return false;
 
-    // Se prueban ventanas consecutivas A-2...K y 2-3...A alto.
-    const starts = Array.from({ length: 15 - n }, (_, i) => i + 1);
-    for (const start of starts) {
+    // El As puede ocupar su posición baja (A-2) o alta (Q-K-A-2).
+    const posiciones = {
+        1: [1, 14], 2: [2, 15], 3: [3, 16],
+    };
+    const opciones = (valor) => posiciones[rangoNumericoCarta(valor)] ||
+        [rangoNumericoCarta(valor)];
+
+    for (let start = 1; start <= 13; start++) {
         const objetivo = Array.from({ length: n }, (_, i) => start + i);
         const objetivoSet = new Set(objetivo);
-        const naturalesEnVentana = ranks.every(r => objetivoSet.has(r) || (r === 1 && objetivo.includes(14)));
-        if (!naturalesEnVentana) continue;
-        const ranksAjustados = ranks.map(r => r === 1 && objetivo.includes(14) && !objetivo.includes(1) ? 14 : r);
-        if (new Set(ranksAjustados).size !== ranksAjustados.length) continue;
-        if (objetivo.filter(r => !ranksAjustados.includes(r)).length === cartas.length - naturales.length) return true;
+        const buscar = (index, usadas) => {
+            if (index === naturales.length) {
+                return objetivo.length - usadas.size === jokers;
+            }
+            for (const pos of opciones(naturales[index].valor)) {
+                if (objetivoSet.has(pos) && !usadas.has(pos)) {
+                    const next = new Set(usadas);
+                    next.add(pos);
+                    if (buscar(index + 1, next)) return true;
+                }
+            }
+            return false;
+        };
+        if (buscar(0, new Set())) return true;
     }
     return false;
 };
 
+// Valida extensiones por cualquiera de los extremos de una escala ya bajada.
 const cartasSePuedenAcoplarAEscala = (escalaCartas, cartasNuevas) => {
-    if (!cartasNuevas.length) return false;
+    if (!Array.isArray(cartasNuevas) || cartasNuevas.length === 0) return false;
     const todas = [...escalaCartas, ...cartasNuevas];
+    if (todas.length > 13 || todas.filter(c => obtenerDetallesCarta(c).esJoker).length > 1) return false;
+    const detallesExistentes = escalaCartas.map(obtenerDetallesCarta);
+    const detallesNuevos = cartasNuevas.map(obtenerDetallesCarta);
     const naturales = todas.map(obtenerDetallesCarta).filter(d => !d.esJoker);
-    if (naturales.length && new Set(naturales.map(d => d.palo)).size !== 1) return false;
-    // Una escala ya bajada solo admite extensiones por sus extremos, nunca huecos internos.
-    const rango = (v) => rangoNumericoCarta(v);
-    const existentes = escalaCartas.map(obtenerDetallesCarta).filter(d => !d.esJoker).map(d => rango(d.valor));
-    const agregadas = cartasNuevas.map(obtenerDetallesCarta).filter(d => !d.esJoker).map(d => rango(d.valor));
-    if (existentes.length && agregadas.length) {
-        const lo = Math.min(...existentes), hi = Math.max(...existentes);
-        if (agregadas.some(r => r >= lo && r <= hi)) return false;
-        const todosLosRangos = [...existentes, ...agregadas];
-        if (new Set(todosLosRangos).size !== todosLosRangos.length) return false;
-        const ordenados = [...todosLosRangos].sort((a,b)=>a-b);
-        if (ordenados.some((r,i)=>i>0 && r !== ordenados[i-1]+1)) return false;
+    if (!naturales.length || new Set(naturales.map(d => d.palo)).size !== 1) return false;
+
+    // Buscar una representación lineal válida de la escala. Así se admiten
+    // extensiones por la izquierda (3-4-5-6-7) y por la derecha, incluso
+    // cuando el As ocupa su posición alta en Q-K-A-2-3.
+    const opcionesPosicion = (valor) => {
+        const rango = rangoNumericoCarta(valor);
+        return rango === 1 ? [1, 14] : rango === 2 ? [2, 15] : rango === 3 ? [3, 16] : [rango];
+    };
+    const existentesNaturales = detallesExistentes.filter(d => !d.esJoker);
+    const nuevosNaturales = detallesNuevos.filter(d => !d.esJoker);
+    for (let inicio = 1; inicio <= 13; inicio++) {
+        const objetivo = Array.from({ length: todas.length }, (_, i) => inicio + i);
+        const objetivoSet = new Set(objetivo);
+        const buscar = (items, index, usadas, asignaciones) => {
+            if (index === items.length) return { usadas, asignaciones };
+            for (const pos of opcionesPosicion(items[index].valor)) {
+                if (objetivoSet.has(pos) && !usadas.has(pos)) {
+                    const next = new Set(usadas); next.add(pos);
+                    const result = buscar(items, index + 1, next, [...asignaciones, pos]);
+                    if (result) return result;
+                }
+            }
+            return null;
+        };
+        const existentes = buscar(existentesNaturales, 0, new Set(), []);
+        if (!existentes) continue;
+        const nuevos = buscar(nuevosNaturales, 0, new Set(existentes.usadas), []);
+        if (!nuevos) continue;
+        const posicionesExistentes = existentes.asignaciones;
+        const posicionesNuevas = nuevos.asignaciones;
+        if (posicionesExistentes.length && posicionesNuevas.length) {
+            const min = Math.min(...posicionesExistentes), max = Math.max(...posicionesExistentes);
+            // Ninguna carta agregada puede insertarse dentro de la escala ya bajada.
+            if (posicionesNuevas.some(pos => pos >= min && pos <= max)) continue;
+        }
+        // Los comodines existentes/nuevos ocupan exactamente los huecos restantes.
+        if (objetivo.length - nuevos.usadas.size !== todas.length - naturales.length) continue;
+        return true;
     }
-    return esSecuenciaValidaCompleta(todas);
+    return false;
 };
 
+// Agrupa los palos en rojo y negro para validar la modalidad Primavera.
 const colorDePalo = (palo) => (palo === 'cup' || palo === 'coin' ? 'rojo' : 'negro');
 
 // Genera candidatas reales para los bots: escalas normales y las tres escalas especiales.
+// Genera combinaciones posibles de escala para que el bot pueda evaluar contratos completos.
+// Construye ventanas de rangos y busca subconjuntos de la mano que encajen en ellas.
 const generarCandidatosEscalaBot = (mano, tipoEspecial = null) => {
     const candidatos = [];
-    const valores = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const valores = ['A','2','3','4','5','6','7','8','9','10','J','Q','K','A','2','3'];
     const agregar = (tipo, indices) => {
         const clave = [...indices].sort((a,b)=>a-b).join(',');
         if (!candidatos.some(c => c.tipo === tipo && c.indices.join(',') === clave))
@@ -243,6 +346,50 @@ const generarCandidatosEscalaBot = (mano, tipoEspecial = null) => {
     return candidatos;
 };
 
+
+
+// Evalúa la fuerza de la mano restante sin consultar cartas futuras ni información oculta.
+// Estima el valor estratégico de una mano según el contrato activo.
+// Heurística local: premia rangos repetidos, vecinos del mismo palo y patrones especiales.
+const evaluarPotencialManoBot = (mano, contrato, tipoEspecial) => {
+    if (!mano.length) return 0;
+    const detalles = mano.map(obtenerDetallesCarta);
+    const especiales = Boolean(contrato.esEspecial);
+    let score = 0;
+    const conteoRango = {};
+    const conteoPalo = {};
+    detalles.forEach(d => {
+        if (d.esJoker) {
+            score += especiales ? -30 : (detalles.filter(x => x.esJoker).length === 1 ? 13 : -18);
+            return;
+        }
+        conteoRango[d.valor] = (conteoRango[d.valor] || 0) + 1;
+        conteoPalo[d.palo] = (conteoPalo[d.palo] || 0) + 1;
+        if (especiales) score += 2;
+    });
+    detalles.forEach((d, i) => {
+        if (d.esJoker) return;
+        const mismoRango = (conteoRango[d.valor] || 0) - 1;
+        if (especiales) {
+            if (mismoRango > 0) score -= 5 * mismoRango;
+            if (tipoEspecial === 'real') score += (conteoPalo[d.palo] || 0) * 2.5;
+            if (tipoEspecial === 'primavera') {
+                const rango = rangoNumericoCarta(d.valor);
+                score += detalles.filter((o, j) => j !== i && !o.esJoker &&
+                    Math.abs(rangoNumericoCarta(o.valor) - rango) === 1 &&
+                    colorDePalo(o.palo) !== colorDePalo(d.palo)).length * 3;
+            }
+        } else {
+            score += mismoRango * 5;
+            score += detalles.filter((o, j) => j !== i && !o.esJoker && o.palo === d.palo &&
+                Math.abs(rangoNumericoCarta(o.valor) - rangoNumericoCarta(d.valor)) <= 2).length * 3;
+        }
+        score -= calcularValorCarta(mano[i]) * 0.35;
+    });
+    return score;
+};
+
+// Calcula el orden de asientos a mostrar, poniendo primero al jugador cuyo turno está activo.
 const obtenerOrdenVisualJugadores = (turnoActual, totalJugadores) => {
     const orden = [];
     for (let i = 0; i < totalJugadores; i++) {
@@ -251,11 +398,50 @@ const obtenerOrdenVisualJugadores = (turnoActual, totalJugadores) => {
     return orden;
 };
 
-function LocalGame({ vsBot = false }) {
+// Presenta los resultados finales ordenados por puntuación ascendente.
+// En Cariocas, el primer lugar corresponde al jugador con menos puntos acumulados.
+function PodioResultados({ resultados, onExit }) {
+    const ordenados = [...resultados].sort((a, b) => a.puntos - b.puntos || a.id - b.id);
+    const ganador = ordenados[0];
+
+    return (
+        <section className="podio-resultados">
+            <p className="podio-eyebrow">PARTIDA FINALIZADA</p>
+            <h1>Resultados finales</h1>
+            {ganador && <p className="podio-ganador">Ganador: <strong>{ganador.nombre}</strong></p>}
+            <div className="podio-columnas">
+                {ordenados.slice(0, 3).map((jugador, index) => (
+                    <article className={`podio-lugar podio-lugar-${index + 1}`} key={jugador.id}>
+                        <span className="podio-posicion">{index + 1}° lugar</span>
+                        <strong>{jugador.nombre}</strong>
+                        <span>{jugador.puntos} puntos</span>
+                    </article>
+                ))}
+            </div>
+            <div className="podio-tabla">
+                <h2>Tabla completa</h2>
+                {ordenados.map((jugador, index) => (
+                    <div className="podio-fila" key={jugador.id}>
+                        <span>{index + 1}. {jugador.nombre}</span>
+                        <strong>{jugador.puntos} pts</strong>
+                    </div>
+                ))}
+            </div>
+            <button className="btn-accion btn-dorado" onClick={onExit}>
+                Volver al menú principal
+            </button>
+        </section>
+    );
+}
+
+// Mesa completa para partidas locales y partidas contra uno o varios bots.
+function LocalGame({ vsBot = false, onExit = () => {} }) {
+    // Configuración de la partida y contrato que se está jugando.
     const [numJugadores, setNumJugadores] = useState(2);
     const [rondaIndex, setRondaIndex] = useState(0);
     const [especialElegido, setEspecialElegido] = useState(null);
 
+    // Estado principal de cartas: mazo, descarte, manos y turno activo.
     const [mazo, setMazo] = useState([]);
     const [descarte, setDescarte] = useState([]);
     const [manosJugadores, setManosJugadores] = useState([]);
@@ -263,11 +449,13 @@ function LocalGame({ vsBot = false }) {
     const [haRobado, setHaRobado] = useState(false);
     const [juegoIniciado, setJuegoIniciado] = useState(false);
 
+    // Estado de contratos: grupos preparados, combinaciones públicas y cartas seleccionadas.
     const [jugadoresBajados, setJugadoresBajados] = useState([]);
     const [juegosEnMesa, setJuegosEnMesa] = useState([]);
     const [cartasSeleccionadas, setCartasSeleccionadas] = useState([]);
     const [gruposParaBajar, setGruposParaBajar] = useState([]);
 
+    // Marcador acumulado, ganador de la ronda y estado de cierre de la partida.
     const [puntuaciones, setPuntuaciones] = useState([]);
     const [ganadorRonda, setGanadorRonda] = useState(null);
     const [puntosUltimaRonda, setPuntosUltimaRonda] = useState([]);
@@ -277,12 +465,15 @@ function LocalGame({ vsBot = false }) {
     const [mostrarPuntajes, setMostrarPuntajes] = useState(false);
     const [seBajoEnEsteTurno, setSeBajoEnEsteTurno] = useState(false);
 
-    // Estados para Drag & Drop (Arrastrar cartas)
+    // Estado visual para ordenar cartas mediante arrastrar y soltar.
     const [cartaArrastradaIndex, setCartaArrastradaIndex] = useState(null);
+    const [indiceDestinoArrastre, setIndiceDestinoArrastre] = useState(null);
     const [botPending, setBotPending] = useState(false);
 
+    // Contrato correspondiente a la ronda seleccionada en la secuencia de juego.
     const contratoActual = CONTRATOS[rondaIndex];
 
+    // Baraja, reparte y reinicia todos los estados necesarios para iniciar la ronda actual.
     const iniciarPartida = () => {
         const lista = [...baraja1, ...baraja2, "JOKER", "JOKER_2", "JOKER_3", "JOKER_4"];
         for (let i = lista.length - 1; i > 0; i--) {
@@ -322,6 +513,7 @@ function LocalGame({ vsBot = false }) {
         setJuegoIniciado(true);
     };
 
+    // Cuando se agota el mazo, conserva la carta superior del descarte y mezcla el resto.
     const verificarYReciclarMazo = (mazoActual, descarteActual) => {
         if (mazoActual.length > 0) return { mazo: mazoActual, descarte: descarteActual };
 
@@ -343,6 +535,7 @@ function LocalGame({ vsBot = false }) {
         };
     };
 
+    // Roba una carta del mazo y marca que el jugador ya realizó su robo del turno.
     const robarMazo = () => {
         if (haRobado || ganadorRonda !== null || manoOculta || botPending) return;
 
@@ -361,6 +554,7 @@ function LocalGame({ vsBot = false }) {
         setHaRobado(true);
     };
 
+    // Toma la carta superior del descarte si el turno todavía permite robar.
     const robarDescarte = () => {
         if (haRobado || descarte.length === 0 || ganadorRonda !== null || manoOculta || botPending) return;
         const copiaDescarte = [...descarte];
@@ -374,6 +568,7 @@ function LocalGame({ vsBot = false }) {
         setHaRobado(true);
     };
 
+    // Añade o quita una carta de la selección actual de la mano.
     const toggleSeleccionCarta = (indexCarta) => {
         if (manoOculta || botPending) return;
         if (cartasSeleccionadas.includes(indexCarta)) {
@@ -384,6 +579,7 @@ function LocalGame({ vsBot = false }) {
     };
 
     // Funciones de ordenamiento separadas
+    // Ordena la mano por rango, dejando los Jokers al final.
     const ordenarManoPorValor = () => {
         const ordenValores = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "JOKER"];
         const manoActual = [...manosJugadores[turno]];
@@ -398,6 +594,7 @@ function LocalGame({ vsBot = false }) {
         setCartasSeleccionadas([]);
     };
 
+    // Ordena primero por palo y después por rango para facilitar la lectura de la mano.
     const ordenarManoPorPalo = () => {
         const ordenPalos = { sword: 1, cup: 2, coin: 3, club: 4, joker: 5 };
         const ordenValores = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -428,29 +625,85 @@ function LocalGame({ vsBot = false }) {
     };
 
     // Lógica de Arrastrar y Soltar (Drag and Drop)
+    // Inicia el arrastre y genera una imagen fantasma nítida para la carta movida.
     const handleDragStart = (e, index) => {
         setCartaArrastradaIndex(index);
+        setIndiceDestinoArrastre(null);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(index));
+        // Evita el fantasma translúcido por defecto: usa una copia nítida de la carta.
+        const imagen = e.currentTarget.querySelector("img");
+        if (imagen && e.dataTransfer.setDragImage) {
+            const copia = imagen.cloneNode(true);
+            Object.assign(copia.style, { width: "78px", height: "110px", opacity: "1", position: "fixed", top: "-1000px", left: "-1000px" });
+            document.body.appendChild(copia);
+            e.dataTransfer.setDragImage(copia, 39, 55);
+            requestAnimationFrame(() => copia.remove());
+        }
     };
 
-    const handleDragOver = (e) => {
+    // Registra el hueco de destino mientras la carta atraviesa la mano.
+    const handleDragOver = (e, index) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (indiceDestinoArrastre !== index) setIndiceDestinoArrastre(index);
     };
 
+    // Inserta la carta en la posición elegida y actualiza el orden de la mano.
     const handleDrop = (e, targetIndex) => {
         e.preventDefault();
-        if (cartaArrastradaIndex === null || cartaArrastradaIndex === targetIndex) return;
-
-        const manoActual = [...manosJugadores[turno]];
-        const [cartaMovida] = manoActual.splice(cartaArrastradaIndex, 1);
-        manoActual.splice(targetIndex, 0, cartaMovida);
-
-        const nuevasManos = [...manosJugadores];
-        nuevasManos[turno] = manoActual;
-        setManosJugadores(nuevasManos);
+        if (cartaArrastradaIndex === null) return;
+        if (cartaArrastradaIndex !== targetIndex) {
+            const manoActual = [...manosJugadores[turno]];
+            const [cartaMovida] = manoActual.splice(cartaArrastradaIndex, 1);
+            manoActual.splice(targetIndex, 0, cartaMovida);
+            const nuevasManos = [...manosJugadores];
+            nuevasManos[turno] = manoActual;
+            setManosJugadores(nuevasManos);
+            setCartasSeleccionadas([]);
+        }
         setCartaArrastradaIndex(null);
+        setIndiceDestinoArrastre(null);
+    };
+
+    // Limpia los indicadores visuales al terminar cualquier operación de arrastre.
+    const handleDragEnd = () => {
+        setCartaArrastradaIndex(null);
+        setIndiceDestinoArrastre(null);
+    };
+
+    // Valida las 13 cartas y las reglas específicas de cada contrato especial.
+    const esContratoEspecialValido = (cartas, subtipo) => {
+        if (cartas.length !== 13) return false;
+        const detalles = cartas.map(obtenerDetallesCarta);
+        if (detalles.some(d => d.esJoker || !d.valor || !d.palo)) return false;
+        const orden = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+        if (orden.some(valor => detalles.filter(d => d.valor === valor).length !== 1)) return false;
+        if (subtipo === "real") return detalles.every(d => d.palo === detalles[0].palo);
+        if (subtipo === "primavera") {
+            return detalles.slice(1).every((d, i) =>
+                colorDePalo(d.palo) !== colorDePalo(detalles[i].palo)
+            );
+        }
+        return subtipo === "loca";
+    };
+
+    // Prepara la escala especial seleccionada y retira sus cartas de la mano.
+    const armarContratoEspecial = () => {
+        if (!contratoActual.esEspecial || !especialElegido) return;
+        const manoActual = manosJugadores[turno];
+        const cartasGrupo = cartasSeleccionadas.map(idx => manoActual[idx]);
+        if (!esContratoEspecialValido(cartasGrupo, especialElegido.id)) return;
+        setGruposParaBajar([...gruposParaBajar, {
+            tipo: "Escala Especial", subtipo: especialElegido.id, cartas: cartasGrupo
+        }]);
+        const nuevasManos = [...manosJugadores];
+        nuevasManos[turno] = manoActual.filter((_, idx) => !cartasSeleccionadas.includes(idx));
+        setManosJugadores(nuevasManos);
         setCartasSeleccionadas([]);
     };
 
+    // Prepara un trío o una escala normal que forma parte del contrato actual.
     const armarGrupoParaBajar = (tipo) => {
         const manoActual = manosJugadores[turno];
         const cartasGrupo = cartasSeleccionadas.map(idx => manoActual[idx]);
@@ -471,6 +724,7 @@ function LocalGame({ vsBot = false }) {
         setCartasSeleccionadas([]);
     };
 
+    // Devuelve a la mano todas las cartas de grupos preparados pero no confirmados.
     const cancelarGruposParaBajar = () => {
         if (gruposParaBajar.length === 0) return;
         const cartasDevueltas = gruposParaBajar.flatMap(g => g.cartas);
@@ -480,6 +734,7 @@ function LocalGame({ vsBot = false }) {
         setGruposParaBajar([]);
     };
 
+    // Comprueba que el jugador haya preparado exactamente todos los grupos requeridos.
     const validarContratoCumplido = () => {
         if (contratoActual.esEspecial) return gruposParaBajar.length > 0;
         const triosActuales = gruposParaBajar.filter(g => g.tipo === "Trío").length;
@@ -487,6 +742,7 @@ function LocalGame({ vsBot = false }) {
         return triosActuales === contratoActual.triosReq && escalasActuales === contratoActual.escalasReq;
     };
 
+    // Confirma los grupos preparados y los publica sobre la mesa.
     const confirmarBajada = () => {
         if (!validarContratoCumplido()) return;
 
@@ -505,8 +761,19 @@ function LocalGame({ vsBot = false }) {
 
         setSeBajoEnEsteTurno(true);
         setGruposParaBajar([]);
+
+        // Bajar el contrato también puede dejar la mano vacía.
+        if (manosJugadores[turno].length === 0) {
+            const penalizaciones = manosJugadores.map((manoJug, idx) =>
+                idx === turno ? 0 : manoJug.reduce((acc, carta) => acc + calcularValorCarta(carta), 0)
+            );
+            setPuntuaciones(prev => prev.map((puntos, idx) => puntos + penalizaciones[idx]));
+            setPuntosUltimaRonda(penalizaciones);
+            setGanadorRonda(turno);
+        }
     };
 
+    // Añade cartas seleccionadas a una combinación ya bajada, validando sus reglas.
     const acoplarCartasAJuego = (juegoId) => {
         if (!haRobado || !jugadoresBajados[turno] || manoOculta || seBajoEnEsteTurno || cartasSeleccionadas.length === 0) return;
 
@@ -544,8 +811,19 @@ function LocalGame({ vsBot = false }) {
         setManosJugadores(nuevasManos);
         setJuegosEnMesa(nuevosJuegos);
         setCartasSeleccionadas([]);
+
+        // Acoplar una o varias cartas puede vaciar la mano sin necesidad de descartar.
+        if (nuevaMano.length === 0) {
+            const penalizaciones = nuevasManos.map((manoJug, idx) =>
+                idx === turno ? 0 : manoJug.reduce((acc, carta) => acc + calcularValorCarta(carta), 0)
+            );
+            setPuntuaciones(prev => prev.map((puntos, idx) => puntos + penalizaciones[idx]));
+            setPuntosUltimaRonda(penalizaciones);
+            setGanadorRonda(turno);
+        }
     };
 
+    // Descarta una carta y determina si la ronda terminó o debe pasar el turno.
     const descartarCarta = (indexCarta) => {
         if (!haRobado || manoOculta || botPending || gruposParaBajar.length > 0) return;
 
@@ -601,21 +879,10 @@ function LocalGame({ vsBot = false }) {
 
             // Toma el descarte solo cuando aporta a un trío o una escala.
             const top = pile[pile.length - 1];
-            const topDetails = top ? obtenerDetallesCarta(top) : null;
-            const rankCount = topDetails && !topDetails.esJoker
-                ? botHand.filter(c => obtenerDetallesCarta(c).valor === topDetails.valor).length : 0;
-            const sequenceHelp = topDetails && !topDetails.esJoker
-                ? botHand.some(c => {
-                    const d = obtenerDetallesCarta(c);
-                    if (d.esJoker || d.palo !== topDetails.palo) return false;
-                    const a = ORDEN_ESCALA.indexOf(d.valor);
-                    const b = ORDEN_ESCALA.indexOf(topDetails.valor);
-                    return a >= 0 && b >= 0 && Math.abs(a - b) <= 2;
-                }) : false;
-            const specialRankHelp = contratoActual.esEspecial && topDetails && !topDetails.esJoker &&
-                !botHand.some(c => { const d = obtenerDetallesCarta(c); return !d.esJoker && d.valor === topDetails.valor; });
-            const takeDiscard = pile.length > 0 && (rankCount >= 1 || sequenceHelp || topDetails?.esJoker || specialRankHelp);
-
+            const tipoEspecialBot = contratoActual.esEspecial ? (especialElegido?.id || 'loca') : null;
+            const takeDiscard = Boolean(top) &&
+                evaluarPotencialManoBot([...botHand, top], contratoActual, tipoEspecialBot) >
+                evaluarPotencialManoBot(botHand, contratoActual, tipoEspecialBot);
             if (takeDiscard) {
                 botHand.push(pile.pop());
             } else {
@@ -625,8 +892,6 @@ function LocalGame({ vsBot = false }) {
                 if (stock.length > 0) botHand.push(stock.shift());
                 else if (pile.length > 0) botHand.push(pile.pop());
             }
-
-            const tipoEspecialBot = contratoActual.esEspecial ? (especialElegido?.id || 'loca') : null;
 
             // Busca el contrato completo sin reutilizar cartas de la mano.
             if (!laidFlags[botIndex]) {
@@ -651,26 +916,35 @@ function LocalGame({ vsBot = false }) {
                 const needTrio = contratoActual.esEspecial ? 0 : contratoActual.triosReq;
                 const needScale = contratoActual.esEspecial ? 0 : contratoActual.escalasReq;
                 let chosen = null;
+                let bestScore = -Infinity;
                 const search = (from, trios, scales, used, groups) => {
-                    if (chosen) return;
-                    if (contratoActual.esEspecial ? groups.length > 0 : trios === needTrio && scales === needScale) {
-                        chosen = groups;
+                    const complete = contratoActual.esEspecial
+                        ? groups.length > 0
+                        : trios === needTrio && scales === needScale;
+                    if (complete) {
+                        const remaining = botHand.filter((_, index) => !used.has(index));
+                        const score = evaluarPotencialManoBot(remaining, contratoActual, tipoEspecialBot);
+                        if (score > bestScore) {
+                            bestScore = score;
+                            chosen = [...groups];
+                        }
                         return;
                     }
                     for (let i = from; i < candidates.length; i++) {
                         const g = candidates[i];
                         if (g.indices.some(index => used.has(index))) continue;
-                        if (g.tipo === 'Trío' && (contratoActual.esEspecial || trios < needTrio)) {
+                        if (g.tipo === 'Trío' && !contratoActual.esEspecial && trios < needTrio) {
                             const next = new Set(used); g.indices.forEach(x => next.add(x));
                             search(i + 1, trios + 1, scales, next, [...groups, g]);
                         }
-                        if (g.tipo === 'Escala' && (contratoActual.esEspecial || scales < needScale)) {
+                        if (g.tipo === 'Escala' && scales < needScale) {
                             const next = new Set(used); g.indices.forEach(x => next.add(x));
                             search(i + 1, trios, scales + 1, next, [...groups, g]);
                         }
                     }
                 };
                 search(0, 0, 0, new Set(), []);
+
                 if (chosen) {
                     const used = new Set(chosen.flatMap(g => g.indices));
                     const laid = chosen.map((g, index) => ({
@@ -719,37 +993,17 @@ function LocalGame({ vsBot = false }) {
             // Descarta la carta menos útil, conservando parejas y secuencias potenciales.
             if (botHand.length > 0) {
                 let discardIndex = 0;
-                let lowest = Infinity;
+                let bestRemainingScore = -Infinity;
                 botHand.forEach((card, i) => {
-                    const d = obtenerDetallesCarta(card);
-                    let utility = 0;
-                    if (d.esJoker) utility += 100;
-                    else {
-                        const iguales = botHand.filter((other, j) => j !== i && obtenerDetallesCarta(other).valor === d.valor).length;
-                        if (contratoActual.esEspecial) {
-                            // Las escalas especiales requieren un ejemplar de cada rango.
-                            utility += iguales === 0 ? 24 : -8;
-                            if (tipoEspecialBot === 'real') {
-                                const conteoPalos = botHand.map(c => obtenerDetallesCarta(c)).filter(x => !x.esJoker)
-                                    .reduce((acc, x) => (acc[x.palo] = (acc[x.palo] || 0) + 1, acc), {});
-                                utility += (conteoPalos[d.palo] || 0) * 3;
-                            } else if (tipoEspecialBot === 'primavera') {
-                                const vecinos = botHand.filter((other,j) => j !== i).map(obtenerDetallesCarta).filter(x => !x.esJoker &&
-                                    Math.abs(rangoNumericoCarta(x.valor) - rangoNumericoCarta(d.valor)) === 1);
-                                utility += vecinos.filter(x => colorDePalo(x.palo) !== colorDePalo(d.palo)).length * 5;
-                            }
-                        } else {
-                            utility += iguales * 8;
-                            utility += botHand.filter((other, j) => {
-                                if (j === i) return false;
-                                const od = obtenerDetallesCarta(other);
-                                return !od.esJoker && od.palo === d.palo &&
-                                    Math.abs(rangoNumericoCarta(od.valor) - rangoNumericoCarta(d.valor)) <= 2;
-                            }).length * 4;
-                        }
-                        utility -= calcularValorCarta(card) * 0.05;
+                    const remaining = botHand.filter((_, j) => j !== i);
+                    // Descarta la carta cuya salida deja la mejor combinación potencial,
+                    // usando penalización alta para cartas caras que no aportan al contrato.
+                    const score = evaluarPotencialManoBot(remaining, contratoActual, tipoEspecialBot) +
+                        calcularValorCarta(card) * 0.08;
+                    if (score > bestRemainingScore) {
+                        bestRemainingScore = score;
+                        discardIndex = i;
                     }
-                    if (utility < lowest) { lowest = utility; discardIndex = i; }
                 });
                 pile.push(botHand.splice(discardIndex, 1)[0]);
             }
@@ -787,6 +1041,7 @@ function LocalGame({ vsBot = false }) {
         contratoActual, especialElegido
     ]);
 
+    // Avanza al contrato siguiente sin perder los puntos acumulados de la partida.
     const avanzarSiguienteRonda = () => {
         if (rondaIndex < CONTRATOS.length - 1) {
             setRondaIndex(rondaIndex + 1);
@@ -796,21 +1051,35 @@ function LocalGame({ vsBot = false }) {
         }
     };
 
+    // Cierra la partida en cualquier ronda y conserva las puntuaciones acumuladas.
+    // La pantalla de resultados se muestra fuera de la mesa para evitar que el juego quede bloqueado.
     const terminarJuego = () => {
         setJuegoTerminado(true);
+        setJuegoIniciado(false);
         setGanadorRonda(null);
+        setMostrarPuntajes(false);
     };
+
+    // Convierte los puntos acumulados en filas ordenables: en Cariocas gana quien menos puntos tiene.
+    // Proyección de puntuaciones a nombres visibles para la pantalla de clasificación.
+    const resultadosFinales = puntuaciones.map((score, index) => ({
+        id: index,
+        nombre: vsBot ? (index === 0 ? 'Tú' : `Bot ${index}`) : `Jugador ${index + 1}`,
+        puntos: score,
+    }));
 
     const ordenJugadores = obtenerOrdenVisualJugadores(turno, numJugadores);
     const oponentes = ordenJugadores.slice(1);
+    // Estado derivado: indica si los grupos preparados satisfacen el contrato actual.
     const cumpleContrato = validarContratoCumplido();
+    // Estado derivado que habilita acciones de extensión sobre combinaciones de la mesa.
     const puedeAcoplarGlobal = haRobado && jugadoresBajados[turno] && cartasSeleccionadas.length > 0 && !seBajoEnEsteTurno;
 
     return (
         <div className="mesa-container">
             <div className="hud-top">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <strong style={{ fontSize: "1.2rem", color: "#d4af37" }}>♠ CARIOCAS</strong>
+                    <strong style={{ fontSize: "1.2rem", color: "#d4af37" }}>CARIOCAS</strong>
                     <span className="contrato-badge">
                         Ronda {contratoActual.id}: {contratoActual.esEspecial && especialElegido ? especialElegido.nombre : contratoActual.nombre}
                     </span>
@@ -818,20 +1087,20 @@ function LocalGame({ vsBot = false }) {
 
                 {juegoIniciado && (
                     <div style={{ fontSize: "0.95rem" }}>
-                        {botPending ? <span style={{ color: "#ffd700", fontWeight: "bold" }}>🤖 Bot {turno} está jugando...</span> : !haRobado ? (
+                        {botPending ? <span style={{ color: "#ffd700", fontWeight: "bold" }}>Bot {turno} está jugando...</span> : !haRobado ? (
                             <span style={{ color: "#ffd700", fontWeight: "bold" }}>
-                                {vsBot ? '👉 Tu turno: roba una carta del Mazo o del Pozo' : `👉 Jugador ${turno + 1}: Roba una carta del Mazo o del Pozo`}
+                                {vsBot ? 'Tu turno: roba una carta del Mazo o del Pozo' : `Jugador ${turno + 1}: Roba una carta del Mazo o del Pozo`}
                             </span>
                         ) : (
                             <span style={{ color: "#81c784", fontWeight: "bold" }}>
-                                ✨ {vsBot ? "Tu turno" : `Jugador ${turno + 1}`}: {jugadoresBajados[turno] ? (seBajoEnEsteTurno ? "Descarta una carta para terminar tu turno" : "Selecciona carta(s) para acoplar o descarta") : "Arma tu contrato o descarta"}
+                                {vsBot ? "Tu turno" : `Jugador ${turno + 1}`}: {jugadoresBajados[turno] ? (seBajoEnEsteTurno ? "Descarta una carta para terminar tu turno" : "Selecciona carta(s) para acoplar o descarta") : "Arma tu contrato o descarta"}
                             </span>
                         )}
                     </div>
                 )}
 
                 <button className="btn-hud" onClick={() => setMostrarPuntajes(!mostrarPuntajes)}>
-                    📊 Puntajes
+                    Puntajes
                 </button>
             </div>
 
@@ -857,16 +1126,7 @@ function LocalGame({ vsBot = false }) {
                 <div className="overlay-modal">
                     <div className="modal-box">
                         {juegoTerminado ? (
-                            <>
-                                <h1 style={{ color: "#d4af37" }}>🏆 ¡Partida Finalizada!</h1>
-                                <p>Resultados finales tras las rondas jugadas:</p>
-                                {puntuaciones.map((pts, idx) => (
-                                    <p key={idx}><strong>{vsBot ? (idx === 0 ? "Tú" : `Bot ${idx}`) : `Jugador ${idx + 1}`}:</strong> {pts} puntos</p>
-                                ))}
-                                <button className="btn-accion btn-dorado" onClick={() => { setRondaIndex(0); setPuntuaciones([]); setJuegoTerminado(false); }}>
-                                    Nueva Partida
-                                </button>
-                            </>
+                            <PodioResultados resultados={resultadosFinales} onExit={onExit} />
                         ) : (
                             <>
                                 <h2 style={{ color: "#d4af37", marginTop: 0 }}>Ronda {contratoActual.id} de 9</h2>
@@ -945,7 +1205,7 @@ function LocalGame({ vsBot = false }) {
                             return (
                                 <div key={idxOp} className="oponente-card-box">
                                     <div style={{ fontSize: "0.85rem", fontWeight: "bold" }}>
-                                        {vsBot ? (idxOp === 0 ? "Tú" : `Bot ${idxOp}`) : `Jugador ${idxOp + 1}`} {jugadoresBajados[idxOp] ? "✅ Bajado" : ""}
+                                        {vsBot ? (idxOp === 0 ? "Tú" : `Bot ${idxOp}`) : `Jugador ${idxOp + 1}`} {jugadoresBajados[idxOp] ? " Bajado" : ""}
                                     </div>
                                     <div style={{ fontSize: "0.75rem", color: "#ccc" }}>
                                         {manosJugadores[idxOp]?.length} cartas en mano
@@ -1075,7 +1335,7 @@ function LocalGame({ vsBot = false }) {
                         {gruposParaBajar.length > 0 && (
                             <div style={{ display: "flex", gap: "10px", marginBottom: "8px", background: "rgba(0,0,0,0.6)", padding: "6px 12px", borderRadius: "8px", alignItems: "center" }}>
                                 <span style={{ fontSize: "0.8rem", color: cumpleContrato ? "#81c784" : "#ffcc00" }}>
-                                    {cumpleContrato ? "✅ Contrato cumplido" : `⚠️ Faltan grupos (Req: ${contratoActual.triosReq} Tríos, ${contratoActual.escalasReq} Escalas)`}
+                                    {cumpleContrato ? " Contrato cumplido" : `Atención Faltan grupos (Req: ${contratoActual.triosReq} Tríos, ${contratoActual.escalasReq} Escalas)`}
                                 </span>
                                 <div style={{ display: "flex", gap: "8px" }}>
                                     {gruposParaBajar.map((g, idx) => (
@@ -1095,33 +1355,45 @@ function LocalGame({ vsBot = false }) {
                         <div className="barra-acciones">
                             {/* Botones de ordenar separados */}
                             <button className="btn-hud" disabled={botPending} onClick={ordenarManoPorPalo}>
-                                ♠ Ordenar Palo
+                                 Ordenar Palo
                             </button>
                             <button className="btn-hud" disabled={botPending} onClick={ordenarManoPorValor}>
-                                🔢 Ordenar Valor
+                                Ordenar por valor
                             </button>
 
                             {!vsBot && <button className="btn-hud" onClick={() => setManoOculta(!manoOculta)}>
-                                {manoOculta ? "👁 Mostrar Mano" : "🙈 Ocultar Mano"}
+                                {manoOculta ? "Mostrar mano" : "Ocultar mano"}
                             </button>}
 
                             {haRobado && !jugadoresBajados[turno] && (
                                 <>
-                                    <button
-                                        className="btn-accion btn-azul"
-                                        onClick={() => armarGrupoParaBajar("Trío")}
-                                        disabled={cartasSeleccionadas.length < 3}
-                                    >
-                                        Armar Trío ({cartasSeleccionadas.length})
-                                    </button>
+                                    {!contratoActual.esEspecial && contratoActual.triosReq > 0 && (
+                                        <button
+                                            className="btn-accion btn-azul"
+                                            onClick={() => armarGrupoParaBajar("Trío")}
+                                            disabled={cartasSeleccionadas.length < 3}
+                                        >
+                                            Armar Trío ({cartasSeleccionadas.length})
+                                        </button>
+                                    )}
 
-                                    {(contratoActual.escalasReq > 0 || contratoActual.esEspecial) && (
+                                    {!contratoActual.esEspecial && contratoActual.escalasReq > 0 && (
                                         <button
                                             className="btn-accion btn-azul"
                                             onClick={() => armarGrupoParaBajar("Escala")}
                                             disabled={cartasSeleccionadas.length !== 4}
                                         >
                                             Armar Escala (4)
+                                        </button>
+                                    )}
+
+                                    {contratoActual.esEspecial && (
+                                        <button
+                                            className="btn-accion btn-dorado"
+                                            onClick={armarContratoEspecial}
+                                            disabled={cartasSeleccionadas.length !== 13 || !especialElegido}
+                                        >
+                                            Armar {especialElegido?.nombre || "Contrato Especial"} (13)
                                         </button>
                                     )}
 
@@ -1132,7 +1404,7 @@ function LocalGame({ vsBot = false }) {
                                                 onClick={confirmarBajada}
                                                 disabled={!cumpleContrato}
                                             >
-                                                ✅ Confirmar Bajada
+                                                Confirmar bajada
                                             </button>
                                             <button className="btn-accion btn-rojo" onClick={cancelarGruposParaBajar}>
                                                 Cancelar
@@ -1147,7 +1419,7 @@ function LocalGame({ vsBot = false }) {
                                     className="btn-accion btn-rojo"
                                     onClick={() => descartarCarta(cartasSeleccionadas[0])}
                                 >
-                                    🗑️ Descartar Carta Seleccionada
+                                    Descartar carta seleccionada
                                 </button>
                             )}
                         </div>
@@ -1174,11 +1446,13 @@ function LocalGame({ vsBot = false }) {
                                     return (
                                         <div
                                             key={`${carta}-${index}`}
-                                            className={`carta-mano-wrapper ${estaSeleccionada ? "carta-seleccionada" : ""}`}
+                                            className={`carta-mano-wrapper ${estaSeleccionada ? "carta-seleccionada" : ""} ${cartaArrastradaIndex === index ? "carta-arrastrando" : ""} ${indiceDestinoArrastre === index && cartaArrastradaIndex !== index ? "carta-destino-arrastre" : ""}`}
                                             draggable={!manoOculta}
                                             onDragStart={(e) => handleDragStart(e, index)}
-                                            onDragOver={handleDragOver}
+                                            onDragOver={(e) => handleDragOver(e, index)}
+                                            onDragLeave={() => setIndiceDestinoArrastre(null)}
                                             onDrop={(e) => handleDrop(e, index)}
+                                            onDragEnd={handleDragEnd}
                                             onClick={() => toggleSeleccionCarta(index)}
                                             onDoubleClick={() => {
                                                 if (haRobado && gruposParaBajar.length === 0) {
@@ -1201,7 +1475,7 @@ function LocalGame({ vsBot = false }) {
             {ganadorRonda !== null && (
                 <div className="overlay-modal">
                     <div className="modal-box">
-                        <h2 style={{ color: "#d4af37", marginTop: 0 }}>🎉 ¡Ronda Cerrada!</h2>
+                        <h2 style={{ color: "#d4af37", marginTop: 0 }}>Ronda cerrada</h2>
                         <p><strong>{vsBot ? (ganadorRonda === 0 ? "Tú" : `Bot ${ganadorRonda}`) : `Jugador ${ganadorRonda + 1}`}</strong> cerró el juego y ganó la ronda.</p>
                         <div style={{ textAlign: "left", background: "#263530", padding: "12px", borderRadius: "8px", margin: "15px 0" }}>
                             {puntosUltimaRonda.map((pts, i) => (
@@ -1216,15 +1490,15 @@ function LocalGame({ vsBot = false }) {
                             {rondaIndex < CONTRATOS.length - 1 ? (
                                 <>
                                     <button className="btn-accion btn-verde" onClick={avanzarSiguienteRonda}>
-                                        Siguiente Contrato ➔
+                                        Siguiente Contrato →
                                     </button>
                                     <button className="btn-accion btn-rojo" onClick={terminarJuego}>
-                                        Terminar Juego 🏁
+                                        Terminar partida y ver podio
                                     </button>
                                 </>
                             ) : (
                                 <button className="btn-accion btn-dorado" onClick={terminarJuego}>
-                                    Ver Podio Final 🏆
+                                    Ver puntuaciones y podio final
                                 </button>
                             )}
                         </div>
@@ -1237,6 +1511,7 @@ function LocalGame({ vsBot = false }) {
 
 import OnlineGame from './OnlineGame.jsx';
 
+// Menú inicial: permite elegir partida local, contra bots o multijugador online.
 function MainMenu({ onSelect }) {
     return (
         <main className="main-menu">
@@ -1246,17 +1521,17 @@ function MainMenu({ onSelect }) {
                 <p className="main-menu-subtitle">¿Cómo quieres jugar hoy?</p>
                 <div className="main-menu-options">
                     <button className="main-menu-option" onClick={() => onSelect('local')}>
-                        <span className="main-menu-icon">♠</span>
+                        <span className="main-menu-icon"></span>
                         <strong>Multijugador local</strong>
                         <small>Comparte el computador y juega por turnos</small>
                     </button>
                     <button className="main-menu-option" onClick={() => onSelect('bot')}>
-                        <span className="main-menu-icon">🤖</span>
+                        <span className="main-menu-icon"></span>
                         <strong>Contra el bot</strong>
                         <small>Enfréntate a la inteligencia artificial</small>
                     </button>
                     <button className="main-menu-option main-menu-online" onClick={() => onSelect('online')}>
-                        <span className="main-menu-icon">🌐</span>
+                        <span className="main-menu-icon"></span>
                         <strong>Multijugador online</strong>
                         <small>Crea una sala pública o privada, o únete a tus amigos</small>
                     </button>
@@ -1266,6 +1541,7 @@ function MainMenu({ onSelect }) {
     );
 }
 
+// Componente raíz: gestiona autenticación y navegación entre modos de juego.
 export default function App() {
     const [section, setSection] = useState('menu');
     const [hasAccess, setHasAccess] = useState(false);
@@ -1281,9 +1557,9 @@ export default function App() {
             {section === 'menu' && <MainMenu onSelect={setSection} />}
             {section === 'local' && <div className="app-game-shell">
                 <button className="btn-accion btn-verde app-back-menu" onClick={goBack}>← Menú principal</button>
-                <LocalGame />
+                <LocalGame onExit={goBack} />
             </div>}
-            {section === 'bot' && <div className="app-game-shell"><button className="btn-accion btn-verde app-back-menu" onClick={goBack}>← Menú principal</button><LocalGame vsBot /></div>}
+            {section === 'bot' && <div className="app-game-shell"><button className="btn-accion btn-verde app-back-menu" onClick={goBack}>← Menú principal</button><LocalGame vsBot onExit={goBack} /></div>}
             {section === 'online' && <OnlineGame initialMode="online" onBack={goBack} />}
         </>
     );

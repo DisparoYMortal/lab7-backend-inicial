@@ -1,8 +1,15 @@
+"""Controlador pequeño para simular turnos del bot fuera del servidor web.
+
+Separa la decisión estratégica del acto de robar o descartar, lo que facilita
+probar el comportamiento del bot de forma aislada.
+"""
+
 from dataclasses import dataclass, field
 from .cards import Card, standard_deck
 from .strategy import CariocasBot
 from .contracts import get_contract
 
+# Estado individual de un jugador en una simulación local del motor.
 @dataclass
 class PlayerState:
     player_id: str
@@ -10,6 +17,7 @@ class PlayerState:
     contract_id: int
     has_laid_contract: bool = False
 
+# Estado de una partida de prueba: jugadores, mazo, descarte, mesa y turno actual.
 @dataclass
 class GameState:
     players: list[PlayerState]
@@ -39,6 +47,7 @@ class GameState:
                 return
         raise ValueError("El jugador no tiene esa carta.")
 
+# Orquesta las decisiones del bot con los cambios reales sobre el estado simulado.
 class BotGameController:
     def __init__(self, bot=None):
         self.bot = bot or CariocasBot()
@@ -57,16 +66,19 @@ class BotGameController:
                                          has_laid_contract=player.has_laid_contract)
         return move.to_dict()
 
+# Los contratos especiales empiezan con trece cartas; los estándar con doce.
 def initial_hand_size(contract_id):
     """Contratos especiales (9-11): 13 cartas; contratos 1-8: 12 cartas."""
     return 13 if get_contract(contract_id).special else 12
 
+# Retira del mazo y entrega el número correcto de cartas para el contrato.
 def deal_player_hand(deck, contract_id):
     count = initial_hand_size(contract_id)
     if len(deck) < count:
         raise ValueError("No hay suficientes cartas para repartir.")
     return [deck.pop() for _ in range(count)]
 
+# Crea y mezcla una baraja doble con comodines para iniciar una simulación.
 def new_shuffled_deck(rng=None):
     import random
     deck = standard_deck()

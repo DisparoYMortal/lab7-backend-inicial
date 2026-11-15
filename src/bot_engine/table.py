@@ -1,7 +1,14 @@
+"""Reglas para extender combinaciones que ya están sobre la mesa.
+
+El bot puede pegar cartas a combinaciones propias o rivales, siempre que la
+extensión respete el tipo de grupo, el palo, el rango y las reglas de comodines.
+"""
+
 from dataclasses import dataclass, field
 from .cards import Card
 from .combinations import Meld
 
+# Representa una combinación pública y guarda la asignación de cualquier comodín usado.
 @dataclass
 class TableMeld:
     owner: str
@@ -11,6 +18,7 @@ class TableMeld:
     assignments: dict = field(default_factory=dict)
     special: bool = False
 
+# Comprueba si una carta puede extender un grupo sin modificarlo todavía.
 def can_add_to_meld(card: Card, meld: TableMeld):
     if meld.special:
         return False
@@ -37,6 +45,7 @@ def can_add_to_meld(card: Card, meld: TableMeld):
         return card.suit == suit and card.rank in (lo - 1, hi + 1) and 1 <= card.rank <= 13
     return False
 
+# Aplica una extensión ya validada y registra la posición que representa un Joker.
 def add_card_to_meld(card: Card, meld: TableMeld):
     if not can_add_to_meld(card, meld):
         raise ValueError("La carta no se puede agregar a esta combinación.")
@@ -52,6 +61,7 @@ def add_card_to_meld(card: Card, meld: TableMeld):
     meld.cards.append(card)
     return meld
 
+# Recorre la mano y encuentra extensiones legales a todos los grupos visibles.
 def find_additions(hand, table_melds):
     """Devuelve agregados legales posibles, incluso a combinaciones de otros jugadores."""
     remaining = list(hand)

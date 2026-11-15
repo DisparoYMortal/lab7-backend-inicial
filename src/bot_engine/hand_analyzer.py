@@ -1,5 +1,8 @@
+"""Analizador de manos para inspeccionar qué contratos están completos."""
+
 from .contracts import CONTRACTS, enumerate_contract_plans, contract_size
 
+# Evalúa por separado cada contrato y devuelve los planes completos encontrados.
 def analyze_hand(hand, normal_scale_length=4):
     results = []
     for contract in CONTRACTS:
