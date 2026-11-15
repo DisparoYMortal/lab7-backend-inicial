@@ -1,7 +1,14 @@
+"""Modelo de cartas y utilidades de conversión del motor Cariocas.
+
+El bot utiliza objetos Card en lugar de cadenas de interfaz para que las reglas
+puedan comparar rangos, palos, duplicados y comodines sin depender del frontend.
+"""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable
 
+# Enumera los cuatro palos usados internamente; sus nombres no dependen de la interfaz.
 class Suit(str, Enum):
     CLUBS = "clubs"
     SPADES = "spades"
@@ -12,6 +19,7 @@ RED_SUITS = {Suit.DIAMONDS, Suit.HEARTS}
 BLACK_SUITS = {Suit.CLUBS, Suit.SPADES}
 RANK_NAMES = {1: "A", 11: "J", 12: "Q", 13: "K"}
 
+# Carta inmutable: la identidad incluye el mazo de origen para distinguir duplicados físicos.
 @dataclass(frozen=True, slots=True)
 class Card:
     rank: int | None
@@ -52,6 +60,7 @@ class Card:
             return f"JOKER-{self.joker_id}"
         return f"{RANK_NAMES.get(self.rank, self.rank)}-{self.suit.value}"
 
+# Construye dos mazos completos y agrega cuatro Jokers identificables.
 def standard_deck() -> list[Card]:
     cards = [Card(rank, suit, deck_id)
              for deck_id in (0, 1)
@@ -60,6 +69,7 @@ def standard_deck() -> list[Card]:
     cards.extend(Card(None, None, joker_id=i) for i in range(4))
     return cards
 
+# Convierte datos serializados a Card y deja pasar objetos Card ya construidos.
 def parse_card(value: dict | Card) -> Card:
     if isinstance(value, Card):
         return value
@@ -67,5 +77,6 @@ def parse_card(value: dict | Card) -> Card:
         return Card(None, None, joker_id=int(value["joker_id"]))
     return Card(int(value["rank"]), Suit(value["suit"]), int(value.get("deck_id", 0)))
 
+# Normaliza una mano completa para que el motor trabaje con objetos Card.
 def parse_hand(values: Iterable[dict | Card]) -> list[Card]:
     return [parse_card(v) for v in values]

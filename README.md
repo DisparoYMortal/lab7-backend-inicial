@@ -64,7 +64,7 @@ Jugar como invitado:
 ```bash
 curl -X POST http://127.0.0.1:8000/api/auth/guest/
 ```
-La respuesta contiene `token` y `username`. El invitado queda almacenado como cuenta anónima local; no debe considerarse una cuenta recuperable. Si aparece un error de base de datos, ejecuta primero `python manage.py migrate` en el backend.
+La respuesta contiene `token` y `username`. El invitado queda almacenado como cuenta anónima local; no debe considerarse una cuenta recuperable. Si aparece un error que menciona `is_connected`, ejecuta `python manage.py migrate` desde `backend/` y reinicia Django. Esta versión incluye la migración `0003_persistent_rooms_presence`, que agrega ese campo requerido por la presencia y sincronización online.
 
 ## API de partidas
 
@@ -124,9 +124,9 @@ PYTHONPATH=src python -m unittest discover -s backend/tests -v
 
 ## Alcance y limitaciones
 
-El botón nuevo abre una interfaz online conectada a la API; la interfaz local original se conserva. El cliente incluye un menú para elegir modo, acceso con inicio de sesión/registro/invitado, creación de salas públicas o privadas, listado de salas públicas, unirse por código, iniciar, robar, preparar y bajar contratos completos, pegar cartas, descartar, avanzar rondas y consultar historial/estadísticas. El motor del bot juega turnos automáticamente con una estrategia heurística sencilla.
+La mesa online reutiliza la misma imagen de mesa y recursos visuales del tablero local; el modo local original se conserva. El cliente incluye un menú para elegir modo, acceso con inicio de sesión/registro/invitado, creación de salas públicas o privadas, listado de salas públicas, unirse por código, iniciar, robar, preparar y bajar contratos completos, pegar cartas, descartar, avanzar rondas y consultar historial/estadísticas. El motor del bot juega turnos automáticamente con una estrategia heurística sencilla.
 
-La sincronización WebSocket de desarrollo usa la capa en memoria; para varios procesos o despliegue público configura Redis. Antes de publicar el juego, añade HTTPS/WSS, una clave secreta segura, hosts/orígenes permitidos, una base de datos de producción y límites de solicitudes. Los invitados son cuentas anónimas temporales y no se pueden recuperar si se pierde su token.
+Para jugar desde otros computadores, el backend debe estar accesible por la red/Internet: configura `VITE_API_URL` con la dirección pública o LAN del backend (sin `/api`) y ajusta `CORS_ALLOWED_ORIGINS` y `DJANGO_ALLOWED_HOSTS`. La sincronización WebSocket de desarrollo usa la capa en memoria; para varios procesos o despliegue público configura Redis. Antes de publicar el juego, añade HTTPS/WSS, una clave secreta segura, hosts/orígenes permitidos, una base de datos de producción y límites de solicitudes. Los invitados son cuentas anónimas temporales y no se pueden recuperar si se pierde su token.
 
 La ejecución del frontend se verificó con `npm run build`; los tests Python del motor y del ciclo de turnos pasaron. En este entorno no fue posible instalar Django desde internet, así que debes ejecutar `pip install -r requirements.txt`, migraciones y una prueba manual de API en tu equipo para validar el entorno Django instalado.
 
@@ -151,3 +151,29 @@ npm run dev
 ```
 
 Mantén Django activo en otra terminal como ya lo tienes configurado.
+
+## Icono de la pestaña
+
+El HTML ya apunta a `/images/reina-muerta.png` como favicon. El ZIP de origen no incluía la imagen Reina Muerta (ni dentro de `src/acets` ni dentro de `src/assets`), por lo que debes colocar el archivo PNG exacto en `public/images/reina-muerta.png`. Cuando se entregue esa imagen, puede integrarse directamente en esa ruta sin modificar el resto del proyecto.
+
+## Documentación del código
+
+Los componentes React, las reglas principales, los endpoints del servidor y los módulos del motor de bots incluyen comentarios explicativos. En `src/bot_engine/` se documentan las fases de análisis de mano, planificación de contratos, elección de robo, bajada de grupos, extensiones y descarte. Los comentarios usan la sintaxis propia de cada lenguaje (`//` en JavaScript, `#` en Python y `/* ... */` en CSS).
+
+
+## Continuidad de salas y mesa online
+- La mesa online usa el mismo archivo `public/images/Mesa.png` y las mismas imágenes de cartas que el modo local.
+- Si el navegador pierde conexión, el cliente intenta reconectar automáticamente.
+- Cerrar el navegador o perder Internet no elimina la sala ni el estado de la partida: quedan guardados en SQLite.
+- Si el anfitrión se desconecta, la administración se transfiere al siguiente participante conectado. Si todos se desconectan, la sala permanece guardada y el primer participante que regrese puede recuperar la administración.
+- Si se elimina la cuenta del creador, la sala no se elimina en cascada.
+- Ejecuta `python manage.py migrate` en `backend/` para aplicar la migración `0003_persistent_rooms_presence`.
+
+## Correcciones del multijugador (noviembre 2026)
+- Se eliminó una declaración duplicada de `is_public` en el modelo.
+- Si el backend detecta que falta `games_gameplayer.is_connected`, ahora responde con instrucciones concretas para aplicar migraciones en lugar de dejar un error críptico.
+- La creación de salas valida la respuesta antes de entrar en la sala y muestra el código para compartir.
+- La sala de espera explica cómo invitar jugadores y solo ofrece iniciar al anfitrión cuando hay al menos dos participantes.
+- El tablero online conserva la distribución visual de la mesa local (fondo `Mesa.png`, HUD, zona de oponentes, centro y mano) y sus recursos compartidos.
+
+**Importante tras actualizar:** desde `backend/`, ejecuta `python manage.py migrate` y reinicia Django. Para que otros computadores se conecten, configura `VITE_API_URL` apuntando a la IP/dominio donde escucha Django; `127.0.0.1` solo funciona en el mismo computador.
