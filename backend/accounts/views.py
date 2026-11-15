@@ -24,7 +24,7 @@ def register(request):
 def login(request):
     user = authenticate(username=request.data.get("username"), password=request.data.get("password"))
     if not user:
-        return Response({"detail": "Usuario o contraseña incorrectos."}, status=400)
+        return Response({"detail": "Usuario o contraseña incorrectos."}, status=401)
     token, _ = Token.objects.get_or_create(user=user)
     return Response({"token": token.key, "username": user.username})
 

@@ -6,9 +6,12 @@ from django.db import transaction, OperationalError
 from django.db.models import Count, Sum
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.exceptions import APIException
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from .models import GameRoom, GamePlayer
+from .serializers import GameRoomSerializer
 from .engine import new_round, public_state, apply_action
 
 # Difunde una notificación de actualización a todos los clientes conectados a la sala.
@@ -28,7 +31,7 @@ def _ensure_host(room, user):
 
 def _room_for_user(code,user):
     try: room=GameRoom.objects.get(code=code.upper())
-    except GameRoom.DoesNotExist: raise ValueError("No existe una sala con ese código.")
+    except GameRoom.DoesNotExist: raise NotFound("No existe una sala con ese código.")
     if not room.players.filter(user=user).exists():
         raise PermissionError("No perteneces a esta sala.")
     return room
@@ -50,6 +53,8 @@ def _response_state(room,user):
     return payload
 # Convierte errores de reglas y permisos a respuestas HTTP comprensibles.
 def _error(exc):
+    if isinstance(exc, APIException):
+        return Response(exc.detail, status=exc.status_code)
     if isinstance(exc, PermissionError):
         return Response({"detail": str(exc)}, status=403)
     if isinstance(exc, OperationalError) and "is_connected" in str(exc):
@@ -58,12 +63,17 @@ def _error(exc):
         }, status=503)
     return Response({"detail": str(exc)}, status=400)
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 # Crea una sala online en espera o inicia una sala individual contra el bot.
 def create_room(request):
-    mode=request.data.get("mode","online")
-    is_public=bool(request.data.get("is_public",False)) if mode=="online" else False
-    if mode not in ("online","bot"): return Response({"detail":"Modo inválido."},status=400)
+    if request.method == "GET":
+        rooms = (GameRoom.objects.filter(players__user=request.user)
+                 .annotate(player_count=Count("players")).distinct().order_by("-created_at"))
+        return Response(GameRoomSerializer(rooms, many=True, context={"request": request}).data)
+    serializer = GameRoomSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    mode = serializer.validated_data.get("mode", "online")
+    is_public = serializer.validated_data.get("is_public", False) if mode == "online" else False
     try:
         with transaction.atomic():
             room=GameRoom.objects.create(owner=request.user,mode=mode,is_public=is_public)
@@ -95,11 +105,23 @@ def join_room(request,code):
     except GameRoom.DoesNotExist: return Response({"detail":"Sala no encontrada."},status=404)
     except Exception as exc: return _error(exc)
 
-@api_view(["GET"])
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
 # Consulta el estado actual de una sala de la que el usuario es miembro.
 def room_detail(request,code):
     try:
-        room=_room_for_user(code,request.user)
+        room = _room_for_user(code, request.user)
+        if request.method in ("PUT", "PATCH"):
+            if room.owner_id != request.user.id:
+                return Response({"detail": "Solo el anfitrión puede editar esta sala."}, status=403)
+            serializer = GameRoomSerializer(room, data=request.data, partial=request.method == "PATCH")
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({"code": room.code, "mode": room.mode, "is_public": room.is_public, "status": room.status})
+        if request.method == "DELETE":
+            if room.owner_id != request.user.id:
+                return Response({"detail": "Solo el anfitrión puede eliminar esta partida."}, status=403)
+            room.delete()
+            return Response(status=204)
         return Response({"code":room.code,"mode":room.mode,"is_public":room.is_public,"status":room.status,
                          "state":_response_state(room,request.user)})
     except Exception as exc: return _error(exc)
@@ -194,7 +216,7 @@ def history(request):
     for room in rooms:
         data.append({"code":room.code,"mode":room.mode,"finished_at":room.finished_at,
                      "round_id":room.state.get("round_id"),"scores":room.state.get("scores",{}),
-                     "players":room.state.get("players",[])})
+                     "players":room.state.get("players",[]),"can_delete":room.owner_id == request.user.id})
     return Response(data)
 
 @api_view(["GET"])
