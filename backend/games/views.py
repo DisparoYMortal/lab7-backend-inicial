@@ -1,7 +1,8 @@
+"""Endpoints HTTP para crear salas, ejecutar acciones y consultar resultados."""
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import transaction, OperationalError
 from django.db.models import Count, Sum
 from django.utils import timezone
 from rest_framework import status
@@ -10,26 +11,55 @@ from rest_framework.response import Response
 from .models import GameRoom, GamePlayer
 from .engine import new_round, public_state, apply_action
 
+# Difunde una notificación de actualización a todos los clientes conectados a la sala.
 def _broadcast(room):
     channel_layer=get_channel_layer()
     async_to_sync(channel_layer.group_send)(f"room_{room.code}", {"type":"game.update","code":room.code})
+# Busca una sala y exige que el usuario autenticado sea participante.
+def _ensure_host(room, user):
+    if room.owner_id == user.id:
+        return
+    owner_online = bool(room.owner_id and room.players.filter(user_id=room.owner_id,is_connected=True).exists())
+    if not owner_online and room.players.filter(user=user,is_connected=True).exists():
+        room.owner = user
+        room.save(update_fields=["owner"])
+        return
+    raise PermissionError("El anfitrión sigue conectado; solo él puede realizar esta acción.")
+
 def _room_for_user(code,user):
     try: room=GameRoom.objects.get(code=code.upper())
     except GameRoom.DoesNotExist: raise ValueError("No existe una sala con ese código.")
     if not room.players.filter(user=user).exists():
         raise PermissionError("No perteneces a esta sala.")
     return room
+# Devuelve el estado apropiado para la fase de la sala y el usuario solicitante.
 def _response_state(room,user):
     if room.state and room.status in ("playing","finished"):
-        return public_state(room.state,str(user.id))
-    return {"code":room.code,"mode":room.mode,"status":room.status,
-            "players":[{"name":p.display_name,"seat":p.seat,"is_bot":p.is_bot}
-                       for p in room.players.all()]}
+        payload = public_state(room.state, str(user.id))
+    else:
+        payload = {"code":room.code,"mode":room.mode,"status":room.status,
+                   "players":[{"player_id":str(p.user_id),"name":p.display_name,"seat":p.seat,
+                               "is_bot":p.is_bot,"is_connected":p.is_connected}
+                              for p in room.players.all()]}
+    payload["owner_id"] = str(room.owner_id) if room.owner_id else None
+    payload["is_owner_connected"] = bool(room.owner_id and room.players.filter(user_id=room.owner_id,is_connected=True).exists())
+    for player in payload.get("players", []):
+        member = room.players.filter(user_id=player.get("player_id")).first()
+        player["is_connected"] = bool(member and member.is_connected)
+        player["is_host"] = bool(room.owner_id and str(room.owner_id) == player.get("player_id"))
+    return payload
+# Convierte errores de reglas y permisos a respuestas HTTP comprensibles.
 def _error(exc):
-    if isinstance(exc,PermissionError): return Response({"detail":str(exc)},status=403)
-    return Response({"detail":str(exc)},status=400)
+    if isinstance(exc, PermissionError):
+        return Response({"detail": str(exc)}, status=403)
+    if isinstance(exc, OperationalError) and "is_connected" in str(exc):
+        return Response({
+            "detail": "La base de datos está desactualizada. En la carpeta backend ejecuta: python manage.py migrate, y reinicia el servidor."
+        }, status=503)
+    return Response({"detail": str(exc)}, status=400)
 
 @api_view(["POST"])
+# Crea una sala online en espera o inicia una sala individual contra el bot.
 def create_room(request):
     mode=request.data.get("mode","online")
     is_public=bool(request.data.get("is_public",False)) if mode=="online" else False
@@ -49,6 +79,7 @@ def create_room(request):
     except Exception as exc: return _error(exc)
 
 @api_view(["POST"])
+# Agrega al usuario a una sala online que todavía está esperando jugadores.
 def join_room(request,code):
     try:
         room=GameRoom.objects.get(code=code.upper())
@@ -65,6 +96,7 @@ def join_room(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["GET"])
+# Consulta el estado actual de una sala de la que el usuario es miembro.
 def room_detail(request,code):
     try:
         room=_room_for_user(code,request.user)
@@ -73,23 +105,25 @@ def room_detail(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["GET"])
+# Lista salas públicas disponibles que aún no alcanzan el máximo de participantes.
 def public_rooms(request):
     rooms=(GameRoom.objects.filter(mode="online",is_public=True,status="waiting")
            .annotate(player_count=Count("players")).filter(player_count__lt=4)
            .select_related("owner").order_by("-created_at")[:30])
     return Response([{
         "code":room.code,
-        "owner":room.owner.username,
+        "owner":room.owner.username if room.owner_id else "Anfitrión desconectado",
         "players":room.player_count,
         "max_players":4,
     } for room in rooms])
 
 
 @api_view(["POST"])
+# Reparte cartas e inicia la partida; solo el anfitrión puede iniciarla.
 def start_room(request,code):
     try:
         room=_room_for_user(code,request.user)
-        if room.owner_id!=request.user.id: raise PermissionError("Solo quien creó la sala puede iniciar.")
+        _ensure_host(room, request.user)
         if room.status!="waiting": raise ValueError("La sala ya fue iniciada.")
         if room.mode=="online" and room.players.count()<2: raise ValueError("Necesitas al menos 2 jugadores.")
         players=[{"player_id":str(p.user_id),"name":p.display_name,"is_bot":p.is_bot}
@@ -101,6 +135,7 @@ def start_room(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["POST"])
+# Valida y persiste una acción de juego y difunde el nuevo estado.
 def game_action(request,code):
     try:
         room=_room_for_user(code,request.user)
@@ -117,10 +152,11 @@ def game_action(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["POST"])
+# Avanza al contrato siguiente o marca la partida como finalizada tras la última ronda.
 def next_round(request,code):
     try:
         room=_room_for_user(code,request.user)
-        if room.owner_id!=request.user.id: raise PermissionError("Solo quien creó la sala puede avanzar.")
+        _ensure_host(room, request.user)
         state=room.state
         if state.get("status")!="round_finished": raise ValueError("La ronda actual aún no termina.")
         next_id=state["round_id"]+1
@@ -138,10 +174,12 @@ def next_round(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["POST"])
+# Cierra una partida activa y deja disponible la clasificación acumulada.
 def finish_game(request,code):
     try:
         room=_room_for_user(code,request.user)
-        if room.owner_id!=request.user.id: raise PermissionError("Solo quien creó la sala puede terminar.")
+        # Cualquier participante autenticado de la sala puede solicitar el cierre de la partida.
+        # _room_for_user ya garantiza que quien realiza la petición pertenece a esta sala.
         room.status="finished"; room.finished_at=timezone.now()
         if room.state: room.state["status"]="finished"
         room.save(); _broadcast(room)
@@ -149,6 +187,7 @@ def finish_game(request,code):
     except Exception as exc: return _error(exc)
 
 @api_view(["GET"])
+# Recupera las partidas terminadas del usuario para mostrar su historial.
 def history(request):
     rooms=GameRoom.objects.filter(players__user=request.user,status="finished").distinct().order_by("-finished_at")[:50]
     data=[]
@@ -159,6 +198,7 @@ def history(request):
     return Response(data)
 
 @api_view(["GET"])
+# Calcula partidas jugadas, victorias y promedio de puntos del usuario.
 def stats(request):
     rooms=GameRoom.objects.filter(players__user=request.user,status="finished").distinct()
     played=rooms.count()

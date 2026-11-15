@@ -1,3 +1,4 @@
+"""Vistas de autenticación, registro y acceso de invitados."""
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -9,6 +10,7 @@ from .serializers import RegisterSerializer
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+# Crea una cuenta nueva y devuelve su token de autenticación.
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -18,6 +20,7 @@ def register(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+# Verifica las credenciales y entrega el token de sesión.
 def login(request):
     user = authenticate(username=request.data.get("username"), password=request.data.get("password"))
     if not user:
@@ -27,6 +30,7 @@ def login(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+# Crea o reutiliza una cuenta temporal para jugar sin registro tradicional.
 def guest(request):
     # Invitados temporales con nombre aleatorio; no se solicita correo ni contraseña.
     import secrets
@@ -37,5 +41,6 @@ def guest(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+# Devuelve los datos básicos de la cuenta asociada al token actual.
 def me(request):
     return Response({"id": request.user.id, "username": request.user.username})

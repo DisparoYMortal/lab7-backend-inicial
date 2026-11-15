@@ -1,3 +1,4 @@
+"""Pruebas de integración del motor autoritativo de partidas online."""
 import os, sys, unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]

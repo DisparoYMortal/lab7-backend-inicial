@@ -1,3 +1,4 @@
+"""Rutas REST para salas, acciones, cierre de partida e historial."""
 from django.urls import path
 from . import views
 urlpatterns = [

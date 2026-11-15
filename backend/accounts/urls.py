@@ -1,3 +1,4 @@
+"""Rutas de registro, inicio de sesión, invitado y perfil actual."""
 from django.urls import path
 from . import views
 urlpatterns = [
