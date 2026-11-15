@@ -1510,6 +1510,7 @@ function LocalGame({ vsBot = false, onExit = () => {} }) {
 }
 
 import OnlineGame from './OnlineGame.jsx';
+import Management from './Management.jsx';
 
 // Menú inicial: permite elegir partida local, contra bots o multijugador online.
 function MainMenu({ onSelect }) {
@@ -1531,9 +1532,19 @@ function MainMenu({ onSelect }) {
                         <small>Enfréntate a la inteligencia artificial</small>
                     </button>
                     <button className="main-menu-option main-menu-online" onClick={() => onSelect('online')}>
-                        <span className="main-menu-icon"></span>
+                        <span className="main-menu-icon">♠</span>
                         <strong>Multijugador online</strong>
                         <small>Crea una sala pública o privada, o únete a tus amigos</small>
+                    </button>
+                    <button className="main-menu-option" onClick={() => onSelect('history')}>
+                        <span className="main-menu-icon">▤</span>
+                        <strong>Visualización de partidas</strong>
+                        <small>Consulta, administra y elimina partidas del historial</small>
+                    </button>
+                    <button className="main-menu-option" onClick={() => onSelect('stats')}>
+                        <span className="main-menu-icon">▥</span>
+                        <strong>Estadísticas</strong>
+                        <small>Consulta y actualiza tu rendimiento de juego</small>
                     </button>
                 </div>
             </div>
@@ -1561,6 +1572,7 @@ export default function App() {
             </div>}
             {section === 'bot' && <div className="app-game-shell"><button className="btn-accion btn-verde app-back-menu" onClick={goBack}>← Menú principal</button><LocalGame vsBot onExit={goBack} /></div>}
             {section === 'online' && <OnlineGame initialMode="online" onBack={goBack} />}
+            {(section === 'history' || section === 'stats') && <Management section={section} onBack={goBack} onNavigate={setSection} />}
         </>
     );
 }
